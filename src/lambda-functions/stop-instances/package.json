@@ -1,0 +1,23 @@
+{
+  "name": "instance-shutdown-script",
+  "version": "0.1.0",
+  "description": "Shuts down instances at a specified time.",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ec2": "^3.699.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.146",
+    "@types/node": "^22.9.4",
+    "node-loader": "^2.1.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0",
+    "zip-webpack-plugin": "^4.0.2"
+  }
+}

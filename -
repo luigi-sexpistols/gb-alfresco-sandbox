@@ -1,0 +1,76 @@
+user.signingkey=0C1817107E10E8D0
+user.email=ashley@richmond.cool
+user.name=Ashley Richmond
+commit.gpgsign=true
+alias.pulldevelop=!f() { git checkout develop && git pull; }; f
+alias.pullmaster=!f() { git checkout master && git pull; }; f
+alias.pd=pulldevelop
+alias.pm=pullmaster
+alias.featurestart=!f() { if [ "$(git config project.featurebranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.featurebranchfrom) && git pull && git checkout -b $(git config project.featurebranchformat | sed 's@{ticketid}@'"$1"'@g'); }; f
+alias.featurecheckout=!f() { if [ "$(git config project.featurebranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.featurebranchfrom || echo 'develop') && git pull && git checkout $(git config project.featurebranchformat | sed 's@{ticketid}@'"$1"'@g') && git merge $(git config project.featurebranchfrom);  }; f
+alias.featurerename=!f() { if [ "$(git config project.featurebranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git branch -m $(git config project.featurebranchformat | sed 's@{ticketid}@'"$1"'@g') $(git config project.featurebranchformat | sed 's@{ticketid}@'"$2"'@g'); }; f
+alias.bugfixstart=!f() { if [ "$(git config project.bugfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.bugfixbranchfrom) && git pull && git checkout -b $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$1"'@g'); }; f
+alias.bugfixcheckout=!f() { if [ "$(git config project.bugfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.bugfixbranchfrom || echo 'develop') && git pull && git checkout $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$1"'@g') && git merge $(git config project.bugfixbranchfrom); }; f
+alias.bugfixrename=!f() { if [ "$(git config project.bugfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git branch -m $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$1"'@g') $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$2"'@g'); }; f
+alias.hotfixstart=!f() { if [ "$(git config project.hotfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.hotfixbranchfrom) && git pull && git checkout -b $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$1"'@g'); }; f
+alias.hotfixcheckout=!f() { if [ "$(git config project.hotfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.hotfixbranchfrom || echo 'develop') && git pull && git checkout $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$1"'@g') && git merge $(git config project.hotfixbranchfrom); }; f
+alias.hotfixrename=!f() { if [ "$(git config project.hotfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git branch -m $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$1"'@g') $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$2"'@g'); }; f
+alias.fs=featurestart
+alias.fc=featurecheckout
+alias.fr=featurerename
+alias.bs=bugfixstart
+alias.bc=bugfixcheckout
+alias.br=bugfixrename
+alias.hs=hotfixstart
+alias.hc=hotfixcheckout
+alias.hr=hotfixrename
+alias.releasestart=!f() { git pd && git flow release start $1; }; f
+alias.releasecheckout=!f() { git fetch && git checkout release/$1; git pull; }; f
+alias.rs=releasestart
+alias.rc=releasecheckout
+alias.backmerge=!f() { git pm && git pd && git merge master; }; f
+gpg.program=/usr/bin/gpg
+core.autocrlf=false
+core.editor=vim
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
+user.signingkey=0C1817107E10E8D0
+user.email=ashley@richmond.cool
+user.name=Ashley Richmond
+commit.gpgsign=true
+alias.pulldevelop=!f() { git checkout develop && git pull; }; f
+alias.pullmaster=!f() { git checkout master && git pull; }; f
+alias.pd=pulldevelop
+alias.pm=pullmaster
+alias.featurestart=!f() { if [ "$(git config project.featurebranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.featurebranchfrom) && git pull && git checkout -b $(git config project.featurebranchformat | sed 's@{ticketid}@'"$1"'@g'); }; f
+alias.featurecheckout=!f() { if [ "$(git config project.featurebranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.featurebranchfrom || echo 'develop') && git pull && git checkout $(git config project.featurebranchformat | sed 's@{ticketid}@'"$1"'@g') && git merge $(git config project.featurebranchfrom);  }; f
+alias.featurerename=!f() { if [ "$(git config project.featurebranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git branch -m $(git config project.featurebranchformat | sed 's@{ticketid}@'"$1"'@g') $(git config project.featurebranchformat | sed 's@{ticketid}@'"$2"'@g'); }; f
+alias.bugfixstart=!f() { if [ "$(git config project.bugfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.bugfixbranchfrom) && git pull && git checkout -b $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$1"'@g'); }; f
+alias.bugfixcheckout=!f() { if [ "$(git config project.bugfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.bugfixbranchfrom || echo 'develop') && git pull && git checkout $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$1"'@g') && git merge $(git config project.bugfixbranchfrom); }; f
+alias.bugfixrename=!f() { if [ "$(git config project.bugfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git branch -m $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$1"'@g') $(git config project.bugfixbranchformat | sed 's@{ticketid}@'"$2"'@g'); }; f
+alias.hotfixstart=!f() { if [ "$(git config project.hotfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.hotfixbranchfrom) && git pull && git checkout -b $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$1"'@g'); }; f
+alias.hotfixcheckout=!f() { if [ "$(git config project.hotfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git checkout $(git config project.hotfixbranchfrom || echo 'develop') && git pull && git checkout $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$1"'@g') && git merge $(git config project.hotfixbranchfrom); }; f
+alias.hotfixrename=!f() { if [ "$(git config project.hotfixbranchfrom)" = "" ]; then echo 'Repository is not set up for aliases!'; exit 1; fi; git branch -m $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$1"'@g') $(git config project.hotfixbranchformat | sed 's@{ticketid}@'"$2"'@g'); }; f
+alias.fs=featurestart
+alias.fc=featurecheckout
+alias.fr=featurerename
+alias.bs=bugfixstart
+alias.bc=bugfixcheckout
+alias.br=bugfixrename
+alias.hs=hotfixstart
+alias.hc=hotfixcheckout
+alias.hr=hotfixrename
+alias.releasestart=!f() { git pd && git flow release start $1; }; f
+alias.releasecheckout=!f() { git fetch && git checkout release/$1; git pull; }; f
+alias.rs=releasestart
+alias.rc=releasecheckout
+alias.backmerge=!f() { git pm && git pd && git merge master; }; f
+gpg.program=/usr/bin/gpg
+core.autocrlf=false
+core.editor=vim
+core.repositoryformatversion=0
+core.filemode=true
+core.bare=false
+core.logallrefupdates=true
