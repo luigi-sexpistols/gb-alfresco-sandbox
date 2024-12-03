@@ -13,12 +13,13 @@
     - name: "SELinux settings"
       become: true
       ansible.builtin.shell: |
-        if [[ "$(grep -Ev '^SELINUX=disabled$' /etc/selinux/config | wc -l)" == "0" ]]; then
+        if [[ "$(grep -Eo '^SELINUX=disabled$' /etc/selinux/config | wc -l)" == "0" ]]; then
           setenforce 0;
-          sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config;
+          sed -i 's/SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config;
         fi
 
 - name: Install Tomcat
+  # based on https://www.ubuntumint.com/install-apache-tomcat-rhel-9/
   hosts: alfresco
   tasks:
     - name: Create user
@@ -47,7 +48,8 @@
       ansible.builtin.unarchive:
         src: https://dlcdn.apache.org/tomcat/tomcat-10/v${tomcat_version}/bin/apache-tomcat-${tomcat_version}.tar.gz
         remote_src: yes
-        dest: /home/tomcat/installs/apache-tomcat-${tomcat_version}
+        dest: /home/tomcat/installs
+        creates: /home/tomcat/installs/apache-tomcat-${tomcat_version}
 
     - name: Send config files
       become: true
