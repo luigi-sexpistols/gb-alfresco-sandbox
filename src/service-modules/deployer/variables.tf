@@ -29,15 +29,3 @@ variable "additional_instance_ingress_rules" {
     cidr = optional(string)
   }))
 }
-
-variable "tomcat_version" {
-  type = string
-}
-
-variable "hosts" {
-  type = list(object({
-    id = string
-    private_ip = string
-  }))
-  default = []
-}

@@ -68,3 +68,31 @@ variable "lb_logs_enabled" {
   type = bool
   default = false
 }
+
+variable "database" {
+  type = object({
+    admin = object({
+      username = string
+      password = string
+    })
+    user = object({
+      username = string
+      password = string
+    })
+  })
+}
+
+variable "bootstrapping" {
+  type = object({
+    bastion = object({
+      instance = object({
+        id = string
+        public_ip = string
+      })
+      ssh_private_key = string
+    })
+    ansible = object({
+      ssh_public_key = string
+    })
+  })
+}

@@ -1,5 +1,5 @@
 module "lambda_stop_instances" {
-  source = "./modules/lambda-stop-instances"
+  source = "../service-modules/lambda-functions/stop-instances"
   providers = {
     aws = aws.deployer
   }

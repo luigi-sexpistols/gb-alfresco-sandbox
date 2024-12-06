@@ -3,7 +3,7 @@ resource "terraform_data" "vpc_cidr_prefix" {
 }
 
 module "network" {
-  source = "./modules/network"
+  source = "../service-modules/network"
   providers = {
     aws = aws
   }

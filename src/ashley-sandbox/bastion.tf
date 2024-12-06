@@ -1,5 +1,5 @@
 module "bastion" {
-  source = "./modules/bastion"
+  source = "../service-modules/bastion"
   providers = {
     aws = aws.bastion
   }

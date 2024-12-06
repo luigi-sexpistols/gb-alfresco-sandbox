@@ -1,5 +1,6 @@
 locals {
   environment = "ashley-sandbox"
+  instance_files_dir = "${path.root}/instance-files"
 
   networking = {
     cidr_block = "12.23.13.0/24"
@@ -9,7 +10,7 @@ locals {
   }
 
   lambda = {
-    local_code_dir = "${path.module}/../lambda-functions"
+    local_code_dir = "${path.root}/../lambda-functions"
   }
 
   deployer = {
@@ -18,6 +19,10 @@ locals {
   }
 
   alfresco = {
+    storage = {
+      mount_point = "/mnt/efs/gb-alfresco"
+    }
+
     mq = {
       admin_username = "admin"
       user_username = "alfresco"

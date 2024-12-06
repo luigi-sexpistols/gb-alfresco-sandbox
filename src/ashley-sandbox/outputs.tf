@@ -36,7 +36,7 @@ output "alfresco_tomcat_admin_username" {
 output "alfresco_tomcat_admin_password" {
   value = random_password.tomcat_admin.result
   sensitive = true
-  depends_on = [terraform_data.alfresco_bootstrap]
+  depends_on = [module.alfresco]
 }
 
 

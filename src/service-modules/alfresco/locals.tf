@@ -6,12 +6,7 @@ locals {
     user_username = "alfresco"
   }
 
-  database = {
-    admin_username = "admin"
-    user_username = "alfresco"
-  }
-
-  tomcat = {
-    admin_username = "admin"
+  instance = {
+    efs_mount_point = "/mnt/efs/gb-alfresco"
   }
 }

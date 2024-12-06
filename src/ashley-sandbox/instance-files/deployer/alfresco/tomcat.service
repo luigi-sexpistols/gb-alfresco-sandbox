@@ -6,6 +6,7 @@ After=network.target
 Type=forking
 Environment=CATALINA_PID=/usr/local/tomcat10/temp/tomcat.pid
 Environment=CATALINA_HOME=/usr/local/tomcat10
+Environment=CATALINA_BASE=/usr/local/tomcat10
 Environment='CATALINA_OPTS=-Xms512M -Xmx1G -Djava.net.preferIPv4Stack=true'
 Environment='JAVA_OPTS=-Djava.awt.headless=true'
 ExecStart=/usr/local/tomcat10/bin/startup.sh

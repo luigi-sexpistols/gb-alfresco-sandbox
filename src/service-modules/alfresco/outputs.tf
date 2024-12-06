@@ -16,12 +16,12 @@ output "file_system" {
   value = aws_efs_file_system.this
 }
 
-output "file_system_mount_target" {
-  value = aws_efs_mount_target.alfresco
+output "dist_bucket" {
+  value = aws_s3_bucket.dist
 }
 
-output "tomcat_admin_username" {
-  value = local.tomcat.admin_username
+output "database_cluster" {
+  value = aws_rds_cluster.this
 }
 
 # output "message_queue_admin_username" {
