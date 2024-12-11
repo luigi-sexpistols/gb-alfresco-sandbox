@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/alfresco-upgrade.iml" filepath="$PROJECT_DIR$/alfresco-upgrade.iml" />
+      <module fileurl="file://$PROJECT_DIR$/infra-sandbox.iml" filepath="$PROJECT_DIR$/infra-sandbox.iml" />
     </modules>
   </component>
 </project>

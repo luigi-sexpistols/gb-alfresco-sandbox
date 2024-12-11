@@ -3,9 +3,10 @@ data "aws_iam_policy_document" "this" {
     sid = "AllowStopInstances"
     effect = "Allow"
     actions = [
-      "ec2:StopInstances"
+      "ec2:StopInstances",
+      "ec2:DescribeInstances"
     ]
-    resources = [ for instance in var.instances : instance.arn ]
+    resources = [ "*" ]
   }
 
   statement {
@@ -61,7 +62,7 @@ resource "aws_iam_role_policy_attachment" "access" {
 }
 
 data "local_file" "code_archive" {
-  filename = "${path.root}/../lambda-functions/stop-instances/dist/app.zip"
+  filename = "${path.root}/../../../lambda-functions/stop-instances/dist/app.zip"
 }
 
 resource "aws_security_group" "this" {
@@ -117,7 +118,7 @@ resource "aws_lambda_function" "stop_instances" {
 
   environment {
     variables = {
-      INSTANCE_IDS = join(",", [ for instance in var.instances : instance.id ])
+      MATCH = jsonencode(var.match_tag)
     }
   }
 

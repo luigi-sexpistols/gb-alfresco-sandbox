@@ -1,14 +1,13 @@
-variable "name_prefix" {
+variable "tenant" {
   type = string
 }
 
-variable "name" {
+variable "environment" {
   type = string
 }
 
 variable "cidr_block" {
   type = string
-  // todo - validate
 }
 
 variable "public_subnets" {
@@ -16,7 +15,6 @@ variable "public_subnets" {
     cidr_block = string
     availability_zone = string
   }))
-  // todo - validate cidr and availability_zone?
 }
 
 variable "private_subnets" {
@@ -24,5 +22,4 @@ variable "private_subnets" {
     cidr_block = string
     availability_zone = string
   }))
-  // todo - validate cidr and availability_zone?
 }

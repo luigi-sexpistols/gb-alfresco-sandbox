@@ -20,11 +20,13 @@ variable "subnet" {
   })
 }
 
-variable "allowed_ingress" {
-  type = map(object({
-    name = optional(string)
+variable "additional_instance_ingress_rules" {
+  type = list(object({
+    name = string
+    protocol = string
     port = number
-    cidr_block = string
+    security_group_id = optional(string)
+    cidr = optional(string)
   }))
 }
 

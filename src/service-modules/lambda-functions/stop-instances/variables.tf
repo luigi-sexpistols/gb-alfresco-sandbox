@@ -24,9 +24,9 @@ variable "schedule_expression" {
   default = "cron(30 6 * * ? *)" // 16:30 (+10)
 }
 
-variable "instances" {
-  type = list(object({
-    id = string
-    arn = string
-  }))
+variable "match_tag" {
+  type = object({
+    name = string
+    value = string
+  })
 }

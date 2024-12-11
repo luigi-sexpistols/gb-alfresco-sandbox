@@ -1,0 +1,309 @@
+# Script (and install-tomcat.sh) built on concepts from https://www.ubuntumint.com/install-apache-tomcat-rhel-9/
+
+- name: Pre-requisites
+  hosts: alfresco
+  become: true
+  become_user: root
+  tasks:
+    - name: Get run timestamp
+      ansible.builtin.shell: "date +%s"
+      register: install_timestamp
+
+    - name: Install dependencies
+      ansible.builtin.dnf:
+        name:
+          - java-17-openjdk
+          - pip
+          - tar
+          - unzip
+
+    - name: Import MySQL GPG key
+      ansible.builtin.shell: rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+
+    - name: Install MySQL JDBC driver
+      ansible.builtin.dnf:
+        name: https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-j-9.1.0-1.el9.noarch.rpm
+        state: present
+
+    - name: Install AWS Python library
+      ansible.builtin.shell: pip install boto3
+
+    - name: SELinux settings
+      ansible.builtin.shell: |
+        if [[ "$(grep -Eo '^SELINUX=disabled$' /etc/selinux/config | wc -l)" == "0" ]]; then
+          setenforce 0;
+          sed -i 's/SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config;
+        fi
+
+- name: Install Tomcat
+  gather_facts: false
+  hosts: alfresco
+  become: true
+  tasks:
+    - name: Create user `tomcat`
+      ansible.builtin.user:
+        name: tomcat
+
+    - name: Create installs directory
+      become_user: tomcat
+      ansible.builtin.file:
+        state: directory
+        path: /home/tomcat/apache-tomcat
+        mode: '0755'
+
+    - name: Create logs directory
+      ansible.builtin.file:
+        state: directory
+        path: /var/log/tomcat10
+        owner: tomcat
+        group: tomcat
+        mode: '0744'
+
+    - name: Download and extract
+      become_user: tomcat
+      ansible.builtin.unarchive:
+        src: https://dlcdn.apache.org/tomcat/tomcat-10/v${tomcat_version}/bin/apache-tomcat-${tomcat_version}.tar.gz
+        remote_src: yes
+        dest: /home/tomcat/apache-tomcat
+        creates: /home/tomcat/apache-tomcat/apache-tomcat-${tomcat_version}/webapps
+
+    - name: Rename install dir
+      become_user: tomcat
+      ansible.builtin.shell: "mv /home/tomcat/apache-tomcat/apache-tomcat-${tomcat_version} /home/tomcat/apache-tomcat/{{install_timestamp.stdout}}"
+
+    - name: Symlink installing dir
+      become_user: tomcat
+      ansible.builtin.file:
+        state: link
+        src: "/home/tomcat/apache-tomcat/{{install_timestamp.stdout}}"
+        dest: /home/tomcat/apache-tomcat/installing
+
+    - name: Remove logs dir
+      ansible.builtin.file:
+        state: absent
+        path: /home/tomcat/apache-tomcat/installing/logs
+
+    - name: Create symlinks
+      ansible.builtin.file:
+        state: link
+        src: "{{item.target}}"
+        dest: "{{item.link_name}}"
+        owner: tomcat
+        group: tomcat
+      loop:
+        - target: /var/log/tomcat10
+          link_name: /home/tomcat/apache-tomcat/installing/logs
+
+    - name: Install service
+      ansible.builtin.copy:
+        src: ${ansible_work_dir}/alfresco/tomcat.service
+        dest: /etc/systemd/system/tomcat.service
+        mode: "0644"
+
+    - name: Register service
+      become: true
+      ansible.builtin.shell: "{{item}}"
+      loop:
+        - systemctl daemon-reload
+        - systemctl enable tomcat
+
+- name: Install Alfresco
+  hosts: alfresco
+  gather_facts: false
+  become: true
+  become_user: tomcat
+  tasks:
+    - name: Change owner of EFS mount point
+      become_user: root
+      ansible.builtin.file:
+        state: directory
+        path: /mnt/efs/alfresco
+        owner: tomcat
+        group: tomcat
+
+    - name: Download distribution
+      amazon.aws.s3_object:
+        bucket: ${alfresco_dist_bucket}
+        object: ${alfresco_dist_filename}
+        dest: /tmp/${alfresco_dist_filename}
+        mode: get
+
+    - name: Create directories
+      ansible.builtin.file:
+        state: directory
+        dest: "{{item}}"
+      loop:
+        - "/home/tomcat/alfresco-content-services/{{install_timestamp.stdout}}"
+        - /home/tomcat/apache-tomcat/modules/platform
+        - /home/tomcat/apache-tomcat/modules/share
+        - /home/tomcat/apache-tomcat/installing/shared/classes
+        - /home/tomcat/apache-tomcat/installing/conf/Catalina/localhost
+        - /home/tomcat/apache-tomcat/installing/alf_data
+
+    - name: Extract distribution
+      ansible.builtin.unarchive:
+        src: /tmp/${alfresco_dist_filename}
+        remote_src: yes
+        dest: "/home/tomcat/alfresco-content-services/{{install_timestamp.stdout}}"
+
+    - name: Create `installing` symlink
+      ansible.builtin.file:
+        state: link
+        src: "/home/tomcat/alfresco-content-services/{{install_timestamp.stdout}}"
+        dest: /home/tomcat/alfresco-content-services/installing
+
+    - name: Create MySQL JDBC symlink
+      ansible.builtin.file:
+        state: link
+        src: /usr/share/java/mysql-connector-j.jar
+        dest: /home/tomcat/apache-tomcat/installing/lib/mysql-connector-j.jar
+
+    - name: Remove existing webapps
+      ansible.builtin.file:
+        state: absent
+        path: "/home/tomcat/apache-tomcat/installing/webapps/{{item}}"
+      loop:
+        - docs
+        - examples
+        - host-manager
+        - ROOT
+
+    - name: Copy config files
+      ansible.builtin.copy: "{{item}}"
+      loop:
+        - src: ${ansible_work_dir}/alfresco/alfresco-global.properties
+          dest: /home/tomcat/alfresco-content-services/installing/web-server/shared/classes/alfresco-global.properties
+          mode: "0600"
+        - src: ${ansible_work_dir}/alfresco/alfresco-setenv.sh
+          dest: /home/tomcat/alfresco-content-services/installing/bin/setenv.sh
+          mode: "0700"
+        - src: ${ansible_work_dir}/alfresco/tomcat-users.xml
+          dest: /home/tomcat/apache-tomcat/installing/conf/tomcat-users.xml
+          mode: "0600"
+        - src: ${ansible_work_dir}/alfresco/tomcat-server.xml
+          dest: /home/tomcat/apache-tomcat/installing/conf/server.xml
+          mode: "0600"
+        - src: ${ansible_work_dir}/alfresco/tomcat-context.xml
+          dest: /home/tomcat/apache-tomcat/installing/webapps/manager/META-INF/context.xml
+
+    - name: Create deployed WAR directories
+      ansible.builtin.file:
+        state: directory
+        dest: "/home/tomcat/alfresco-content-services/installing/web-server/webapps/{{item}}"
+      loop:
+        - alfresco
+        - share
+
+    - name: Create symlinks
+      ansible.builtin.file:
+        state: link
+        # must be the absolute path (NOT A SYMLINK!) because the `installing` symlink is removed later
+        src: "/home/tomcat/alfresco-content-services/{{install_timestamp.stdout}}/{{item.target}}"
+        dest: "/home/tomcat/apache-tomcat/installing/{{item.link_name}}"
+      loop:
+        - target: web-server/webapps/_vti_bin.war
+          link_name: webapps/_vti_bin.war
+        - target: web-server/webapps/alfresco.war
+          link_name: webapps/alfresco.war
+        - target: web-server/webapps/alfresco
+          link_name: webapps/alfresco
+        - target: web-server/webapps/ROOT.war
+          link_name: webapps/ROOT.war
+        - target: web-server/webapps/share.war
+          link_name: webapps/share.war
+        - target: web-server/webapps/share
+          link_name: webapps/share
+        - target: web-server/conf/Catalina/localhost/alfresco.xml
+          link_name: conf/Catalina/localhost/alfresco.xml
+        - target: web-server/conf/Catalina/localhost/share.xml
+          link_name: conf/Catalina/localhost/share.xml
+        - target: web-server/shared/classes/alfresco-global.properties
+          link_name: shared/classes/alfresco-global.properties
+        - target: keystore
+          link_name: alf_data/keystore
+        - target: bin/setenv.sh
+          link_name: bin/setenv.sh
+
+    - name: Deploy WARs with logging
+      ansible.builtin.unarchive:
+        src: "/home/tomcat/alfresco-content-services/installing/web-server/webapps/{{item}}.war"
+        remote_src: yes
+        dest: "/home/tomcat/alfresco-content-services/installing/web-server/webapps/{{item}}"
+        creates: "/home/tomcat/alfresco-content-services/installing/web-server/webapps/{{item}}/WEB-INF/classes/log4j2.properties"
+      loop:
+        - alfresco
+        - share
+
+    - name: Update logging config
+      ansible.builtin.replace: "{{item}}"
+      loop:
+        - path: /home/tomcat/apache-tomcat/installing/conf/catalina.properties
+          regexp: ^shared\.loader=$
+          replace: shared.loader=$${catalina.base}/shared/classes,$${catalina.base}/shared/lib/*.jar
+        - path: /home/tomcat/apache-tomcat/installing/webapps/alfresco/WEB-INF/classes/log4j2.properties
+          regexp: ^appender.rolling.fileName=alfresco\.log$
+          replace: appender.rolling.fileName=/usr/local/tomcat10/logs/alfresco.log
+        - path: /home/tomcat/apache-tomcat/installing/webapps/share/WEB-INF/classes/log4j2.properties
+          regexp: ^appender.rolling.fileName=share\.log$
+          replace: appender.rolling.fileName=/usr/local/tomcat10/logs/share.log
+
+    - name: Find libs
+      ansible.builtin.find:
+        # must be the absolute path (NOT VIA A SYMLINK!)
+        path: /home/tomcat/alfresco-content-services/{{install_timestamp.stdout}}/web-server/lib
+        patterns: "*.jar"
+      register: lib
+
+    - name: Create symlinks for libs
+      ansible.builtin.file:
+        state: link
+        src: "{{item.path}}"
+        dest: "/home/tomcat/apache-tomcat/installing/lib/{{item.path | basename}}"
+      with_items: "{{lib.files}}"
+
+    # todo - amps
+
+    - name: Clean up symlinks
+      ansible.builtin.file: "{{item}}"
+      loop:
+        - state: link
+          src: "/home/tomcat/apache-tomcat/{{install_timestamp.stdout}}"
+          dest: /home/tomcat/apache-tomcat/current
+        - state: link
+          src: "/home/tomcat/alfresco-content-services/{{install_timestamp.stdout}}"
+          dest: /home/tomcat/alfresco-content-services/current
+        - state: absent
+          path: /home/tomcat/apache-tomcat/installing
+        - state: absent
+          path: /home/tomcat/alfresco-content-services/installing
+
+- name: Deploy and restart Tomcat
+  hosts: alfresco
+  gather_facts: false
+  become: true
+  become_user: root
+  tasks:
+    - name: Stop Tomcat
+      become_user: root
+      ansible.builtin.shell: systemctl stop tomcat
+
+    - name: Deploy new install
+      become_user: root
+      ansible.builtin.file:
+        state: link
+        src: /home/tomcat/apache-tomcat/current
+        dest: /usr/local/tomcat10
+        owner: tomcat
+        group: tomcat
+
+    - name: Start Tomcat
+      become_user: root
+      ansible.builtin.shell: systemctl start tomcat
+
+    - name: Clean up older installs
+      ansible.builtin.shell:
+        cmd: ls -1tr . | grep --color=never -E "^[0-9]+$" | head -n -3 | xargs -d '\n' rm -rf --
+        chdir: "{{item}}"
+      loop:
+        - /home/tomcat/apache-tomcat/
+        - /home/tomcat/alfresco-content-services/

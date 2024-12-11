@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+export GB_TF_AWS_MFA_DEVICE_ARN=''
+export GB_TF_AWS_ASSUMED_ROLE_ARN=''
+export GB_TF_AWS_CLI_PROFILE_IDENTITY='gb-identity'
+export GB_TF_AWS_CLI_PROFILE_ASSUMED_ROLE='terraform'
+export GB_TF_AWS_REGION='ap-southeast-2'

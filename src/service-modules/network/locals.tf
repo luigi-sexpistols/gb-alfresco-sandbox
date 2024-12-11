@@ -1,5 +1,3 @@
 locals {
-  vpc = {
-    name = join("-", [ for part in [var.name_prefix, var.name] : part if length(part) > 0 ])
-  }
+  vpc_name = "${var.name_prefix}-${var.name}"
 }
