@@ -1,6 +1,5 @@
 resource "terraform_data" "database_bootstrap" {
   depends_on = [
-    aws_rds_cluster_instance.this,
     aws_rds_cluster_instance.this
   ]
 

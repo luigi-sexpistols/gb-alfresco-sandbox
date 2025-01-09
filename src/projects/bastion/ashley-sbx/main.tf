@@ -1,5 +1,5 @@
 module "bastion" {
-  source = "../../../service-modules/bastion"
+  source = "../../../modules/services/bastion"
 
   name_prefix = "${var.tenant}-${var.environment}"
   name = "bastion"

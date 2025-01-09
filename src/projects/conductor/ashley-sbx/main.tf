@@ -4,7 +4,7 @@ resource "random_password" "tomcat_admin" {
 }
 
 module "conductor" {
-  source = "../../../service-modules/conductor"
+  source = "../../../modules/services/conductor"
 
   name_prefix = "${var.tenant}-${var.environment}"
   name = "conductor"

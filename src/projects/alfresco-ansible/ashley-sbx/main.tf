@@ -9,7 +9,7 @@ resource "random_password" "database_user" {
 }
 
 module "alfresco" {
-  source = "../../../service-modules/alfresco-ansible"
+  source = "../../../modules/services/alfresco-ansible"
 
   name_prefix = "${var.tenant}-${var.environment}"
   name = "alfresco-ansible"

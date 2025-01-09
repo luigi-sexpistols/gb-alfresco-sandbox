@@ -28,7 +28,7 @@ resource "terraform_data" "instance-bootstrap" {
   # creates a file on the remote host
   provisioner "file" {
     destination = "/tmp/efs-mount.sh"
-    content = templatefile("${path.module}/files/instance/efs-mount.template.sh", {
+    content = templatefile("${path.module}/files/instance/mount-efs.template.sh", {
       mount_point = local.instance.efs_mount_point
       efs_mount_target = aws_efs_mount_target.alfresco.dns_name
       file_system_id = aws_efs_file_system.this.id

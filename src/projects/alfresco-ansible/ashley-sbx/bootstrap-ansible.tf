@@ -64,7 +64,7 @@ resource "terraform_data" "ansible_bootstrap" {
 
   provisioner "file" {
     destination = "${local.ansible.alf_dir}/tomcat-server.xml"
-    content = templatefile("${path.module}/ansible/alfresco/tomcat-server.template.xml", {
+    content = templatefile("server.template.xml", {
       keystore_password = var.alfresco_keystore_password
     })
   }
@@ -79,7 +79,7 @@ resource "terraform_data" "ansible_bootstrap" {
 
   provisioner "file" {
     destination = "${local.ansible.alf_dir}/tomcat-context.xml"
-    content = templatefile("${path.module}/ansible/alfresco/tomcat-context.template.xml", {
+    content = templatefile("context.template.xml", {
       allowed_ip_address_regex = "^10\\.105\\.\\d{1,3}\\.\\d{1,3}$" # todo - interpret from vpc?
     })
   }
@@ -109,7 +109,7 @@ resource "terraform_data" "ansible_bootstrap" {
 
   provisioner "file" {
     destination = "${local.ansible.alf_dir}/alfresco-setenv.sh"
-    content = templatefile("${path.module}/ansible/alfresco/alfresco-setenv.template.sh", {
+    content = templatefile("setenv.template.sh", {
       keystore_password = var.alfresco_keystore_password
       metadata_password = var.alfresco_metadata_password
     })

@@ -1,5 +1,5 @@
 module "lambda_stop_instances" {
-  source = "../../../service-modules/lambda-functions/stop-instances"
+  source = "../../../modules/services/lambda-functions/stop-instances"
 
   name_prefix = "${var.tenant}-${var.environment}"
   name = "stopinstances"
