@@ -45,8 +45,8 @@ previous_last_line=""
 while true; do
   result=$(\
     aws --profile=terraform logs get-log-events\
-      --log-group-name='/aws/imagebuilder/ashley-sbx-alfresco-ami'\
-      --log-stream-name='0.1.0/1'\
+      --log-group-name='/aws/imagebuilder/ashley-alfresco2-builder'\
+      --log-stream-name='0.1.0/2'\
       --start-time="${start_time}000"\
       --output=text\
   )

@@ -6,7 +6,7 @@ terraform {
     }
     random = {
       source = "hashicorp/random"
-      version = "3.6.2"
+      version = "~> 3.0"
     }
   }
 }
@@ -114,7 +114,7 @@ resource "aws_rds_cluster_instance" "this" {
   engine_version = aws_rds_cluster.this.engine_version
 
   tags = {
-    Name = "${aws_rds_cluster.this.cluster_identifier}-${count.index}"
+    Name = "${aws_rds_cluster.this.cluster_identifier}-${count.index + 1}"
   }
 }
 

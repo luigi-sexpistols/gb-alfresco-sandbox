@@ -30,10 +30,11 @@ Convenience script for executing a deploy in a given project and environment. Ca
 |:--------------------|:---------------------------------------------------------------------|
 | --home={path}       | Sets the working directory. Defaults to current working dir (`pwd`). |
 | --project={project} | Maps directly to `src/projects/{project}`.                           |
-| --environment={env} | Maps directly to `src/projects/{project}/{env}`.                     |
+| --environment={env} | Maps directly to `src/projects/project/{env}`.                       |
 | --plan              | Sets the mode to `plan`. This is the default mode.                   | 
 | --apply             | Sets the mode to `apply`.                                            |
 | --destroy           | Sets the mode to `destroy`.                                          |
+| --approve           | Automatically approves an `apply` or `destroy` command.              |
 
 ```shell
 ./deploy.sh --project=networking --environment=au-dev --apply

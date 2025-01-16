@@ -13,7 +13,10 @@ variable "vpc_id" { type = string }
 
 variable "subnet_ids" { type = set(string) }
 
-variable "ingress_from" { type = map(string) }
+variable "ingress_from" {
+  type = map(string)
+  default = {}
+}
 
 module "security_group" {
   source = "../security_group"
@@ -53,4 +56,8 @@ output "file_system_id" {
 
 output "mount_target_dns_name" {
   value = { for k, v in aws_efs_mount_target.this : v.availability_zone_name => v.mount_target_dns_name }
+}
+
+output "security_group_id" {
+  value = module.security_group.security_group_id
 }
