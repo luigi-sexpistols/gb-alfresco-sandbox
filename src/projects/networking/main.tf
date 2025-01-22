@@ -1,5 +1,5 @@
 module "network" {
-  source = "../../../modules/services/network"
+  source = "../../modules/services/network"
 
   name_prefix = "${var.tenant}-${var.environment}"
   name = "shared"

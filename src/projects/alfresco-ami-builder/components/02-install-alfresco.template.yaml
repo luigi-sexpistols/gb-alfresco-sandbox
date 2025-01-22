@@ -8,7 +8,7 @@ phases:
         inputs:
 %{ for file in s3_files ~}
           - source: s3://${file.bucket}/${file.key}
-            destination: /tmp/${basename(file.key)}
+            destination: /tmp/downloads/${basename(file.key)}
 %{ endfor ~}
 #      - name: DownloadWebFiles
 #        action: WebDownload
@@ -21,6 +21,6 @@ phases:
         onFailure: Abort
         inputs:
           commands:
-            - chmod +x /tmp/${installer_filename}
-            - /tmp/${installer_filename}
-            - rm -rf /tmp/${installer_filename}
+            - chmod +x /tmp/downloads/${installer_filename}
+            - /tmp/downloads/${installer_filename}
+            - rm -rf /tmp/downloads/${installer_filename}

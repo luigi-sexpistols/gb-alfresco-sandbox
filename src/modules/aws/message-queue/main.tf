@@ -30,7 +30,7 @@ data "aws_vpc" "destination" {
 }
 
 module "security_group" {
-  source = "../security_group"
+  source = "../security-group"
 
   name = "${var.name}-mq-internal"
   vpc_id = data.aws_vpc.destination.id
@@ -100,4 +100,8 @@ output "security_group_id" {
 
 output "endpoint" {
   value = aws_mq_broker.this.instances.0.endpoints.0
+}
+
+output "private_ip_address" {
+  value = aws_mq_broker.this.instances.0.ip_address
 }

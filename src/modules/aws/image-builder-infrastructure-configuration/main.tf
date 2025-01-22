@@ -81,7 +81,7 @@ module "key_pair" {
 }
 
 module "security_group" {
-  source = "../security_group"
+  source = "../security-group"
 
   name = "${var.name}-imagebuilder"
   vpc_id = data.aws_vpc.destination.id

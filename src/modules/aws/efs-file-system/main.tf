@@ -19,7 +19,7 @@ variable "ingress_from" {
 }
 
 module "security_group" {
-  source = "../security_group"
+  source = "../security-group"
 
   name = "${var.name}-efs"
   vpc_id = var.vpc_id
@@ -40,6 +40,10 @@ resource "aws_efs_file_system" "this" {
   creation_token = var.name
   performance_mode = "generalPurpose"
   throughput_mode = "bursting"
+
+  tags = {
+    Name = var.name
+  }
 }
 
 resource "aws_efs_mount_target" "this" {

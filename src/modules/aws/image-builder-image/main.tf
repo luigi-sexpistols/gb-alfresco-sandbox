@@ -26,7 +26,7 @@ module "key_pair" {
 }
 
 module "builder_security_group" {
-  source ="../security_group"
+  source ="../security-group"
 
   name = "${var.name}-image-builder-internal"
   vpc_id = var.infrastructure_config.vpc_id

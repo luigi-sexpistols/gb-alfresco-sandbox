@@ -15,6 +15,15 @@ variable "name" {
   type = string
 }
 
+variable "engine" {
+  type = string
+}
+
+variable "engine_version" {
+  type = string
+  default = null
+}
+
 variable "database_name" {
   type = string
 }
@@ -74,7 +83,7 @@ resource "aws_db_subnet_group" "this" {
 }
 
 module "security_group" {
-  source = "../security_group"
+  source = "../security-group"
 
   name = "${var.name}-db-${random_string.sg_suffix.result}"
   vpc_id = data.aws_vpc.destination.id
@@ -82,8 +91,8 @@ module "security_group" {
 
 resource "aws_rds_cluster" "this" {
   cluster_identifier = var.name
-  engine = "aurora-mysql"
-  engine_version = "8.0.mysql_aurora.3.05.2"
+  engine = "aurora-${var.engine}"
+  engine_version = var.engine_version
   availability_zones = data.aws_subnet.destination.*.availability_zone
   database_name = var.database_name
   master_username = var.admin_username

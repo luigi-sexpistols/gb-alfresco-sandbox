@@ -7,7 +7,7 @@ resource "random_string" "sg_suffix" {
 }
 
 module "security_group" {
-  source = "../security_group"
+  source = "../security-group"
   name = "${var.name}-lb-${random_string.sg_suffix.result}"
   vpc_id = data.aws_vpc.destination.id
 }

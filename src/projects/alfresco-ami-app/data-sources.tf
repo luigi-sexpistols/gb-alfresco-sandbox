@@ -1,33 +1,11 @@
 data "aws_caller_identity" "current" {}
 
-data "terraform_remote_state" "networking" {
-  backend = "local"
-
-  config = {
-    path = "${path.root}/../networking/ashley-sbx/terraform.tfstate"
-  }
-}
-
-data "aws_vpc" "shared" {
-  id = data.terraform_remote_state.networking.outputs.vpc.id
-}
-
-data "aws_subnets" "private" {
-  filter {
-    name = "subnet-id"
-    values = data.terraform_remote_state.networking.outputs.private_subnets.*.id
-  }
-}
-
-data "aws_subnets" "public" {
-  filter {
-    name = "subnet-id"
-    values = data.terraform_remote_state.networking.outputs.public_subnets.*.id
-  }
+module "network_data" {
+  source = "../../modules/utils/networking-data"
 }
 
 resource "random_shuffle" "instance_subnet_ids_pool" {
-  input = data.terraform_remote_state.networking.outputs.private_subnets.*.id
+  input = module.network_data.private_subnets.*.id
 }
 
 data "aws_subnet" "instance" {
@@ -35,35 +13,11 @@ data "aws_subnet" "instance" {
 }
 
 resource "random_shuffle" "message_queue_subnet_ids_pool" {
-  input = data.terraform_remote_state.networking.outputs.private_subnets.*.id
+  input = module.network_data.private_subnets.*.id
 }
 
 data "aws_subnet" "message_queue" {
   id = random_shuffle.message_queue_subnet_ids_pool.result[0]
-}
-
-data "terraform_remote_state" "alfresco_builder" {
-  backend = "local"
-
-  config = {
-    path = "${path.root}/../alfresco-ami-2-builder/terraform.tfstate"
-  }
-}
-
-data "terraform_remote_state" "bastion" {
-  backend = "local"
-
-  config = {
-    path = "${path.root}/../bastion/ashley-sbx/terraform.tfstate"
-  }
-}
-
-data "aws_instance" "bastion" {
-  instance_id = data.terraform_remote_state.bastion.outputs.instance_id
-}
-
-data "aws_security_group" "bastion" {
-  id = data.terraform_remote_state.bastion.outputs.reference_security_group_id
 }
 
 data "aws_imagebuilder_image_pipeline" "alfresco" {

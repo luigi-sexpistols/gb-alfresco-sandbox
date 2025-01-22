@@ -91,7 +91,7 @@ resource "aws_key_pair" "this" {
 }
 
 module "security_group" {
-  source = "../security_group"
+  source = "../security-group"
 
   name = "${var.name}-${random_string.sg_suffix.result}"
   vpc_id = data.aws_vpc.destination.id
@@ -106,12 +106,7 @@ resource "aws_instance" "this" {
   key_name = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.this.0.key_name
   iam_instance_profile = var.instance_profile_name
 
-  tags = merge(
-    {
-      Name = var.name
-    },
-    var.tags
-  )
+  tags = merge({ Name = var.name }, var.tags)
 }
 
 output "instance_id" {
@@ -134,4 +129,8 @@ output "ssh_private_key" {
   value = var.key_pair_name == null ? tls_private_key.this.0.private_key_pem : "provided key"
   sensitive = true
   depends_on = [aws_instance.this]
+}
+
+output "availability_zone" {
+  value = aws_instance.this.availability_zone
 }

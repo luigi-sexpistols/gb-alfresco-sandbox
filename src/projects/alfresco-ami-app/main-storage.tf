@@ -2,8 +2,8 @@ module "alfresco_files" {
   source = "../../modules/aws/efs-file-system"
 
   name = "${local.name_prefix}-alfresco-data"
-  subnet_ids = data.aws_subnets.private.ids
-  vpc_id = data.aws_vpc.shared.id
+  subnet_ids = module.network_data.private_subnets.*.id
+  vpc_id = module.network_data.vpc.id
 }
 
 module "alfresco_files_sg_rules" {

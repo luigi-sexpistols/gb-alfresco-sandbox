@@ -12,19 +12,20 @@ on_exit() {
   [ $exit_code -ne 0 ] && echo "Failed command (code $1) on line $2: '${last_command}'"
 }
 
-install_dir_root="/tmp/installing"
+downloads_dir=/tmp/downloads
+install_dir_root=/tmp/installing
 install_dir_tomcat="${install_dir_root}/tomcat"
 install_dir_alfresco="${install_dir_root}/alfresco"
 
 for dir in "${install_dir_tomcat}" "${install_dir_alfresco}"; do
   if [ ! -d "${dir}" ]; then
-    mkdir -p "${dir}"
+    mkdir -p "${dir}
   fi
 done
 
 # extract distributions
-tar -xz -f /tmp/apache-tomcat.tar.gz --wildcards -C "${install_dir_tomcat}" --strip=1 apache-tomcat-*
-unzip -q /tmp/alfresco-content-services-distribution.zip -d "${install_dir_alfresco}"
+tar -xz -f "${downloads_dir}/apache-tomcat.tar.gz" --wildcards -C "${install_dir_tomcat}" --strip=1 apache-tomcat-*
+unzip -q "${downloads_dir}/alfresco-content-services-distribution.zip" -d "${install_dir_alfresco}"
 
 # create required directories
 for item in webapps/alfresco webapps/share modules/platform modules/share shared/classes conf/Catalina/localhost; do
@@ -42,6 +43,13 @@ for item in _vti_bin.war alfresco.war ROOT.war share.war; do
     mv "${install_dir_alfresco}/web-server/webapps/${item}" "${install_dir_tomcat}/webapps/"
 done
 
+# install amps
+for amp_file in "${downloads_dir}/*.amp"; do
+  java -jar "${install_dir_alfresco}/bin/alfresco-mmt.jar" install -nobackup "${downloads_dir}/${amp_file}" "${install_dir_tomcat}/webapps/alfresco.war"
+done
+
+java -jar "${install_dir_alfresco}/bin/alfresco-mmt.jar" install -nobackup "${install_dir_alfresco}/amps/alfresco-shar-services.amp" "${install_dir_tomcat}/webapps/alfresco.war"
+
 unzip -q "${install_dir_tomcat}/webapps/alfresco.war" -d "${install_dir_tomcat}/webapps/alfresco"
 unzip -q "${install_dir_tomcat}/webapps/share.war" -d "${install_dir_tomcat}/webapps/share"
 
@@ -54,13 +62,11 @@ find "${install_dir_alfresco}/web-server/lib/" -maxdepth 0 -print0 | while IFS= 
   fi
 done
 
-mv /tmp/alfresco-global.properties "${install_dir_tomcat}/shared/classes/"
-mv /tmp/setenv.sh "${install_dir_tomcat}/bin/"
-mv /tmp/tomcat-users.xml "${install_dir_tomcat}/conf/"
-mv /tmp/server.xml "${install_dir_tomcat}/conf"
-mv /tmp/context.xml "${install_dir_tomcat}/webapps/manager/META-INF/"
-
-# todo - amps
+mv "${downloads_dir}/alfresco-global.properties" "${install_dir_tomcat}/shared/classes/"
+mv "${downloads_dir}/setenv.sh" "${install_dir_tomcat}/bin/"
+mv "${downloads_dir}/tomcat-users.xml" "${install_dir_tomcat}/conf/"
+mv "${downloads_dir}/server.xml" "${install_dir_tomcat}/conf"
+mv "${downloads_dir}/context.xml" "${install_dir_tomcat}/webapps/manager/META-INF/"
 
 # update logging config
 sed -i 's|^shared\.loader=$|shared.loader=\$\{catalina.base\}/shared/classes,\$\{catalina.base\}/shared/lib/*.jar|g' "${install_dir_tomcat}/conf/catalina.properties"
@@ -80,19 +86,10 @@ ln -s /mnt/efs/alfresco "${install_dir_tomcat}/alf_data"
 mv "${install_dir_tomcat}" /usr/local/tomcat10
 chown --recursive tomcat:tomcat /usr/local/tomcat10
 
-mv /tmp/tomcat.service /etc/systemd/system/tomcat.service
-# todo - re-enable for startup at instance boot
-#systemctl enable tomcat
+# install and enable tomcat service
+mv "${downloads_dir}/tomcat.service" /etc/systemd/system/tomcat.service
+systemctl enable tomcat
 
 # cleanup
-rm -rf /tmp/apache-tomcat.tar.gz
-rm -rf /tmp/alfresco-content-services-distribution.zip
+rm -rf "${downloads_dir}"
 rm -rf "${install_dir_root}"
-
-#echo "============ LIST_ALF_DATA_START ============"
-#echo "LIST /usr/local/tomcat10"
-#ls -la /usr/local/tomcat10/
-#echo "============================================="
-#echo "LIST /usr/local/tomcat10/alf_data"
-#ls -la /usr/local/tomcat10/alf_data
-#echo "============  LIST_ALF_DATA_END  ============"

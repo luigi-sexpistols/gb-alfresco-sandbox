@@ -1,17 +1,9 @@
-data "terraform_remote_state" "networking" {
-  backend = "local"
-
-  config = {
-    path = "${path.root}/../networking/ashley-sbx/terraform.tfstate"
-  }
-}
-
-data "aws_vpc" "shared" {
-  id = data.terraform_remote_state.networking.outputs.vpc.id
+module "networking_data" {
+  source = "../../modules/utils/networking-data"
 }
 
 resource "random_shuffle" "builder_subnet_ids_pool" {
-  input = data.terraform_remote_state.networking.outputs.private_subnets.*.id
+  input = module.networking_data.private_subnets.*.id
 }
 
 data "aws_subnet" "builder" {

@@ -29,7 +29,7 @@ module "alfresco_builder_recipe" {
 
   name = "${local.name_prefix}-builder"
   base_image_id = data.aws_ami.alfresco_builder.id
-  recipe_version = "0.12.1"
+  recipe_version = "0.12.2"
 
   components = {
     "01-system-prep" = {

@@ -73,7 +73,7 @@ resource "aws_s3_object" "alfresco_setenv" {
 
 resource "aws_s3_object" "tomcat_package" {
   bucket = module.image_builder_bucket.bucket.bucket
-  key = "apache-tomcat.tar.gz"
+  key = "tomcat/apache-tomcat.tar.gz"
   source = "${local.alfresco_files_path}/apache-tomcat-10.1.34.tar.gz"
 }
 

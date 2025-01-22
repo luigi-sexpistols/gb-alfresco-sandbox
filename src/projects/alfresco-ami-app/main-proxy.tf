@@ -1,14 +1,12 @@
 data "http" "developer_ip" {
-  # todo - remove after testing
   url = "https://ipv4.icanhazip.com"
 }
-
 
 module "alfresco_proxy" {
   source = "../../modules/aws/application-load-balancer"
 
   name = "${local.name_prefix}-alfresco"
-  subnet_ids = data.aws_subnets.public.ids
+  subnet_ids = module.network_data.public_subnets.*.id
   protocol = "HTTP"
   incoming_port = 80
   target_port = 8080

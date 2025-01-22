@@ -21,5 +21,5 @@ output "ansible_public_key" {
 
 output "ansible_working_dir" {
   value = local.ansible_working_dir
-  depends_on = [terraform_data.bootstrap]
+  # depends_on = [terraform_data.bootstrap]
 }

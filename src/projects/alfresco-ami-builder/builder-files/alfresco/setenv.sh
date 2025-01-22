@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 
 # static options
-
-options=(
-  "encryption.keystore.type=JCEKS"
-  "encryption.cipherAlgorithm=DESede/CBC/PKCS5Padding"
-  "encryption.keyAlgorithm=DESede"
-  "metadata-keystore.aliases=metadata"
-  "metadata-keystore.metadata.algorithm=DESede"
-)
+# (currently set in alfresco-global.properties, since they're just static values)
+declare -a options=()
 
 # ssm parameter options
-
 path_prefix="/alfresco/java/"
 
 result=$(aws ssm get-parameters-by-path --path="${path_prefix}" --recursive --with-decryption)
@@ -33,6 +26,8 @@ done < <(echo "${result}" | jq -c '.Parameters[]')
 
 out=""
 
-for i in "${options[@]}"; do out="${out:+$out }-D${i}"; done
+for i in "${options[@]}"; do
+  out="${out:+$out }-D${i}"
+done
 
 export "JAVA_TOOL_OPTIONS=${out}"

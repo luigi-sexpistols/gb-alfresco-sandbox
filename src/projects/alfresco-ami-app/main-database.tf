@@ -2,8 +2,10 @@ module "alfresco_database" {
   source = "../../modules/aws/rds-cluster"
 
   name = "${local.name_prefix}-alfresco"
+  engine = "mysql"
+  engine_version = "8.0.mysql_aurora.3.05.2"
   database_name = local.db.database
-  subnet_ids = data.aws_subnets.private.ids
+  subnet_ids = module.network_data.private_subnets.*.id
   instance_count = 1
 }
 
@@ -38,9 +40,9 @@ resource "terraform_data" "alfresco_db_bootstrap" {
   )
 
   connection {
-    bastion_host = data.aws_instance.bastion.public_ip
+    bastion_host = module.network_data.bastion_instance.public_ip
     bastion_user = "ec2-user"
-    bastion_private_key = data.terraform_remote_state.bastion.outputs.ssh_private_key
+    bastion_private_key = module.network_data.bastion_ssh_private_key
     type = "ssh"
     host = module.alfresco_instance.private_ip_address
     user = "ec2-user"

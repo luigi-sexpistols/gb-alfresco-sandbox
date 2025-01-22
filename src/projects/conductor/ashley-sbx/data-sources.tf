@@ -6,14 +6,6 @@ data "terraform_remote_state" "networking" {
   }
 }
 
-data "terraform_remote_state" "bastion" {
-  backend = "local"
-
-  config = {
-    path = "${path.root}/../../bastion/${var.tenant}-${var.environment}/terraform.tfstate"
-  }
-}
-
 data "aws_vpc" "shared" {
   id = data.terraform_remote_state.networking.outputs.vpc.id
 }
@@ -34,11 +26,11 @@ data "aws_subnet" "shared_private" {
     values = [random_shuffle.private_subnets.result[0]]
   }
 }
-
-data "aws_security_group" "bastion" {
-  id = data.terraform_remote_state.bastion.outputs.reference_security_group_id
-}
-
-data "aws_instance" "bastion" {
-  instance_id = data.terraform_remote_state.bastion.outputs.instance_id
-}
+#
+# data "aws_security_group" "bastion" {
+#   id = data.terraform_remote_state.bastion.outputs.reference_security_group_id
+# }
+#
+# data "aws_instance" "bastion" {
+#   instance_id = data.terraform_remote_state.bastion.outputs.instance_id
+# }
