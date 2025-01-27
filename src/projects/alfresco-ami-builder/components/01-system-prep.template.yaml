@@ -1,0 +1,38 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: DownloadBucketFiles
+        action: S3Download
+        onFailure: Abort
+        inputs:
+          - source: s3://${installer.bucket}/${installer.key}
+            destination: /tmp/${basename(installer.key)}
+%{ for file in other_files ~}
+          - source: s3://${file.bucket}/${file.key}
+            destination: /tmp/${basename(file.key)}
+%{ endfor ~}
+      - name: SystemPrep
+        action: ExecuteBash
+        onFailure: Abort
+        inputs:
+          commands:
+            - rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+            - |
+              dnf install --assumeyes \
+                java-17-openjdk\
+                tar\
+                unzip\
+                awscli2\
+                nfs-utils-coreos\
+                'https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-j-9.1.0-1.el9.noarch.rpm'
+            - useradd tomcat
+            - |
+              # disable SELinux
+              if [[ "$(grep -Eo '^SELINUX=disabled$' /etc/selinux/config | wc -l)" == "0" ]]; then
+                setenforce 0;
+                sed -i 's/SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config;
+              fi
+            - chmod +x /tmp/${basename(installer.key)}
+            - /tmp/${basename(installer.key)}
+            - rm -rf /tmp/${basename(installer.key)}

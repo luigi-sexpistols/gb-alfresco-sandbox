@@ -42,7 +42,5 @@ while true; do
   esac
 done
 
-clear
-
 cd "${home}/src/projects/${project}/${environment}"
 $command

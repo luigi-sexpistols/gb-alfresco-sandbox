@@ -1,0 +1,9 @@
+[Unit]
+Description=Execute EFS mount script on boot. Should only ever be run once, but also should be idempotent.
+
+[Service]
+Type=forking
+ExecStart=/root/mount-efs.sh
+
+[Install]
+WantedBy=multi-user.target

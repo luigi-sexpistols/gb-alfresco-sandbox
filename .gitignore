@@ -42,6 +42,8 @@ fabric.properties
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+!src/projects/tfstate-store/*.tfstate
+!src/projects/tfstate-store/*.tfstate.*
 crash.log
 crash.*.log
 *.tfvars
@@ -146,4 +148,4 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-setenv.sh
+./setenv.sh

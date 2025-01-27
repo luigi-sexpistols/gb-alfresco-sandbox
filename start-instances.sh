@@ -29,4 +29,4 @@ if [ "$?" != "0" ]; then
   exit 5
 fi
 
-echo "${starting}" | jq -r '.StartingInstances[] | "\\(.InstanceId) \\(.PreviousState.Name) -> \\(.CurrentState.Name)"'
+echo "${starting}" | jq -r '.StartingInstances[] | "\(.InstanceId) \(.PreviousState.Name) -> \(.CurrentState.Name)"'

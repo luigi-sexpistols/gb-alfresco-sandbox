@@ -1,0 +1,21 @@
+[Unit]
+Description=Apache Tomcat Web App Container
+Wants=network.target
+After=network.target
+[Service]
+Type=forking
+Environment=CATALINA_PID=/usr/local/tomcat10/temp/tomcat.pid
+Environment=CATALINA_HOME=/usr/local/tomcat10
+Environment=CATALINA_BASE=/usr/local/tomcat10
+Environment='CATALINA_OPTS=-Xms512M -Xmx1G -Djava.net.preferIPv4Stack=true'
+Environment='JAVA_OPTS=-Djava.awt.headless=true'
+ExecStart=/usr/local/tomcat10/bin/startup.sh
+ExecStop=/usr/local/tomcat10/bin/shutdown.sh
+SuccessExitStatus=143
+User=tomcat
+Group=tomcat
+UMask=0007
+RestartSec=10
+Restart=always
+[Install]
+WantedBy=multi-user.target
