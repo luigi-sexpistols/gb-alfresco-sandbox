@@ -4,10 +4,6 @@ terraform {
       source = "hashicorp/aws"
       version = "~> 5.0"
     }
-    random = {
-      source = "hashicorp/random"
-      version = "~> 3.0"
-    }
   }
 }
 
@@ -62,6 +58,10 @@ data "aws_vpc" "destination" {
   id = data.aws_subnet.destination.0.vpc_id
 }
 
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
+
 resource "random_password" "admin" {
   count = var.admin_password == null ? 1 : 0
 
@@ -69,28 +69,20 @@ resource "random_password" "admin" {
   special = false
 }
 
-resource "random_string" "sg_suffix" {
-  length = 5
-  upper = false
-  lower = true
-  numeric = false
-  special = false
-}
-
 resource "aws_db_subnet_group" "this" {
-  name = var.name
+  name = "${var.name}-${module.name_suffix.result}"
   subnet_ids = data.aws_subnet.destination.*.id
 }
 
 module "security_group" {
   source = "../security-group"
 
-  name = "${var.name}-db-${random_string.sg_suffix.result}"
+  name = var.name
   vpc_id = data.aws_vpc.destination.id
 }
 
 resource "aws_rds_cluster" "this" {
-  cluster_identifier = var.name
+  cluster_identifier = "${var.name}-${module.name_suffix.result}"
   engine = "aurora-${var.engine}"
   engine_version = var.engine_version
   availability_zones = data.aws_subnet.destination.*.availability_zone
@@ -109,7 +101,7 @@ resource "aws_rds_cluster" "this" {
   }
 
   tags = {
-    Name = var.name
+    Name = "${var.name}-${module.name_suffix.result}"
   }
 }
 
@@ -125,6 +117,14 @@ resource "aws_rds_cluster_instance" "this" {
   tags = {
     Name = "${aws_rds_cluster.this.cluster_identifier}-${count.index + 1}"
   }
+}
+
+output "cluster_id" {
+  value = aws_rds_cluster.this.id
+}
+
+output "instance_ids" {
+  value = aws_rds_cluster_instance.this.*.id
 }
 
 output "admin_username" {
@@ -146,10 +146,6 @@ output "endpoint" {
 
 output "reader_endpoint" {
   value = aws_rds_cluster.this.reader_endpoint
-}
-
-output "instance_ids" {
-  value = aws_rds_cluster_instance.this.*.id
 }
 
 output "security_group_id" {

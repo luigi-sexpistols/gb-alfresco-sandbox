@@ -1,7 +1,7 @@
 module "alfresco_files" {
   source = "../../modules/aws/efs-file-system"
 
-  name = "${local.name_prefix}-alfresco-data"
+  name = local.name
   subnet_ids = module.network_data.private_subnets.*.id
   vpc_id = module.network_data.vpc.id
 }

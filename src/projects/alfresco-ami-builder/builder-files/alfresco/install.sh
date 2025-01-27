@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
 
-# exit when any command fails
 set -e
-# keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
-# echo an error message before exiting
-trap 'exit_code=$?; on_exit $exit_code $LINENO' EXIT
-
-on_exit() {
-  # write out an error on fail:
-  [ $exit_code -ne 0 ] && echo "Failed command (code $1) on line $2: '${last_command}'"
-}
+trap 'on_exit $? $LINENO' EXIT
+on_exit() { [ $1 -ne 0 ] && echo "Failed command (code $1) on line $2: '${last_command}'"; }
 
 downloads_dir=/tmp/downloads
 install_dir_root=/tmp/installing
@@ -19,7 +12,7 @@ install_dir_alfresco="${install_dir_root}/alfresco"
 
 for dir in "${install_dir_tomcat}" "${install_dir_alfresco}"; do
   if [ ! -d "${dir}" ]; then
-    mkdir -p "${dir}
+    mkdir -p "${dir}"
   fi
 done
 
@@ -44,11 +37,11 @@ for item in _vti_bin.war alfresco.war ROOT.war share.war; do
 done
 
 # install amps
-for amp_file in "${downloads_dir}/*.amp"; do
-  java -jar "${install_dir_alfresco}/bin/alfresco-mmt.jar" install -nobackup "${downloads_dir}/${amp_file}" "${install_dir_tomcat}/webapps/alfresco.war"
+for amp_file in "${downloads_dir}"/*.amp; do
+  java -jar "${install_dir_alfresco}/bin/alfresco-mmt.jar" install "${amp_file}" "${install_dir_tomcat}/webapps/alfresco.war" -nobackup
 done
 
-java -jar "${install_dir_alfresco}/bin/alfresco-mmt.jar" install -nobackup "${install_dir_alfresco}/amps/alfresco-shar-services.amp" "${install_dir_tomcat}/webapps/alfresco.war"
+java -jar "${install_dir_alfresco}/bin/alfresco-mmt.jar" install "${install_dir_alfresco}/amps/alfresco-share-services.amp" "${install_dir_tomcat}/webapps/alfresco.war" -nobackup
 
 unzip -q "${install_dir_tomcat}/webapps/alfresco.war" -d "${install_dir_tomcat}/webapps/alfresco"
 unzip -q "${install_dir_tomcat}/webapps/share.war" -d "${install_dir_tomcat}/webapps/share"

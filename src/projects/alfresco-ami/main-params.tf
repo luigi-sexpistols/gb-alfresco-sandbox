@@ -4,12 +4,6 @@ resource "aws_ssm_parameter" "alfresco_system_mount_target" {
   value = module.alfresco_files.mount_target_dns_name[data.aws_subnet.instance.availability_zone]
 }
 
-resource "aws_ssm_parameter" "alfresco_java_dir_root" {
-  name = "/alfresco/java/dir/root"
-  type = "String"
-  value = "${local.efs.mount_point}/root"
-}
-
 resource "aws_ssm_parameter" "alfresco_java_db_driver" {
   name = "/alfresco/java/db/driver"
   type = "String"
@@ -37,7 +31,7 @@ resource "aws_ssm_parameter" "alfresco_java_db_password" {
 resource "aws_ssm_parameter" "alfresco_java_mq_endpoint" {
   name = "/alfresco/java/messaging/broker/url"
   type = "String"
-  value = "failover:(${module.alfresco_mq.endpoint})?timeout=3000"
+  value = module.alfresco_mq.endpoint
 }
 
 resource "aws_ssm_parameter" "alfresco_java_mq_broker_username" {
@@ -64,37 +58,37 @@ resource "aws_ssm_parameter" "alfresco_java_mq_password" {
   value = module.alfresco_mq.user_password
 }
 
-resource "aws_ssm_parameter" "alfresco_java_dir_keystore" {
-  name = "/alfresco/java/dir/keystore"
+resource "aws_ssm_parameter" "alfresco_java_metadata__keystore_aliases" {
+  name = "/alfresco/java/metadata-keystore/aliases"
   type = "String"
-  value = "${local.efs.mount_point}/keystore"
+  value = "metadata"
 }
 
-resource "aws_ssm_parameter" "alfresco_java_encryption_keystore_location" {
-  name = "/alfresco/java/encryption/keystore/location"
+resource "aws_ssm_parameter" "alfresco_java_metadata__keystore_metadata_algorithm" {
+  name = "/alfresco/java/metadata-keystore/metadata/algorithm"
   type = "String"
-  value = "${local.efs.mount_point}/keystore/metadata-keystore/keystore"
+  value = "DESede"
 }
 
-resource "aws_ssm_parameter" "alfresco_java_keystore_password" {
-  name = "/alfresco/java/keystore/password"
-  type = "SecureString"
-  value = var.alfresco_keystore_password
-}
+# resource "aws_ssm_parameter" "alfresco_java_keystore_password" {
+#   name = "/alfresco/java/keystore/password"
+#   type = "SecureString"
+#   value = var.alfresco_keystore_password
+# }
 
-resource "aws_ssm_parameter" "alfresco_java_metadata_password" {
-  name = "/alfresco/java/keystore/metadata-password"
-  type = "SecureString"
-  value = var.alfresco_metadata_password
-}
+# resource "aws_ssm_parameter" "alfresco_java_keystore_metadata__password" {
+#   name = "/alfresco/java/keystore/metadata-password"
+#   type = "SecureString"
+#   value = var.alfresco_keystore_password
+# }
 
-resource "aws_ssm_parameter" "alfresco_java_metadata_keystore_password" {
+resource "aws_ssm_parameter" "alfresco_java_metadata__keystore_password" {
   name = "/alfresco/java/metadata-keystore/password"
   type = "SecureString"
   value = var.alfresco_keystore_password
 }
 
-resource "aws_ssm_parameter" "alfresco_java_metadata_keystore_metadata_password" {
+resource "aws_ssm_parameter" "alfresco_java_metadata__keystore_metadata_password" {
   name = "/alfresco/java/metadata-keystore/metadata/password"
   type = "SecureString"
   value = var.alfresco_metadata_password

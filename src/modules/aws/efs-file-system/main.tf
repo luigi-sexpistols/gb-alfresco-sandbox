@@ -18,10 +18,14 @@ variable "ingress_from" {
   default = {}
 }
 
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
+
 module "security_group" {
   source = "../security-group"
 
-  name = "${var.name}-efs"
+  name = var.name
   vpc_id = var.vpc_id
 
   ingress_rules = {
@@ -37,12 +41,12 @@ module "security_group" {
 }
 
 resource "aws_efs_file_system" "this" {
-  creation_token = var.name
+  creation_token = "${var.name}-${module.name_suffix.result}"
   performance_mode = "generalPurpose"
   throughput_mode = "bursting"
 
   tags = {
-    Name = var.name
+    Name = "${var.name}-${module.name_suffix.result}"
   }
 }
 

@@ -1,8 +1,11 @@
 data "terraform_remote_state" "networking" {
-  backend = "local"
+  backend = "s3"
 
   config = {
-    path = "${path.module}/../../../projects/networking/terraform.tfstate"
+    profile = "terraform"
+    bucket = "ashley-sbx-terraform-state-pjbfg"
+    key = "networking/terraform.tfstate"
+    region = "ap-southeast-2"
   }
 }
 

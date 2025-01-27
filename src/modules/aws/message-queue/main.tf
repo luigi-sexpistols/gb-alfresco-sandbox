@@ -29,10 +29,14 @@ data "aws_vpc" "destination" {
   id = data.aws_subnet.destination.0.vpc_id
 }
 
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
+
 module "security_group" {
   source = "../security-group"
 
-  name = "${var.name}-mq-internal"
+  name = var.name
   vpc_id = data.aws_vpc.destination.id
 }
 
@@ -49,7 +53,7 @@ module "user_password" {
 }
 
 resource "aws_mq_broker" "this" {
-  broker_name = var.name
+  broker_name = "${var.name}-${module.name_suffix.result}"
   engine_type = "ActiveMQ"
   engine_version = "5.18"
   host_instance_type = "mq.t3.micro"

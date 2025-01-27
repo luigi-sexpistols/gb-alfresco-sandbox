@@ -21,7 +21,8 @@ fi
 while read -r param; do
   name="$(echo "${param}" | jq -r '.Name' | sed "s|^${path_prefix}||" - | sed -E 's|/|.|g' -)"
   value=$(echo "${param}" | jq -r '.Value')
-  options+=("${name}=${value}")
+  # quote the options (db host wasn't picked up, unquoted)
+  options+=("'${name}=${value}'")
 done < <(echo "${result}" | jq -c '.Parameters[]')
 
 out=""

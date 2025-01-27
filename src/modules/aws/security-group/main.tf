@@ -7,9 +7,13 @@ terraform {
   }
 }
 
-variable "name" { type = string }
+variable "name" {
+  type = string
+}
 
-variable "vpc_id" { type = string }
+variable "vpc_id" {
+  type = string
+}
 
 variable "ingress_rules" {
   type = map(object({
@@ -31,12 +35,16 @@ variable "egress_rules" {
   default = {}
 }
 
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
+
 resource "aws_security_group" "this" {
-  name = var.name
+  name = "${var.name}-${module.name_suffix.result}"
   vpc_id = var.vpc_id
 
   tags = {
-    Name = var.name
+    Name = "${var.name}-${module.name_suffix.result}"
   }
 }
 

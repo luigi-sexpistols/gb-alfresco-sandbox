@@ -2,16 +2,21 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "5.54.1"
+      version = "~> 5.0"
     }
   }
 }
+
 variable "name" {
   type = string
 }
 
 variable "assuming_services" {
   type = list(string)
+}
+
+module "name_suffix" {
+  source = "../../utils/name-suffix"
 }
 
 data "aws_iam_policy_document" "assume_role" {
@@ -27,7 +32,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "this" {
-  name = var.name
+  name = "${var.name}-${module.name_suffix.result}"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
   tags = {

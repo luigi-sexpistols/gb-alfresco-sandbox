@@ -1,5 +1,5 @@
 locals {
-  name_prefix = "${var.tenant}-${var.environment}-ansible"
+  name_prefix = "ashley-sbx-alfans"
 
   db = {
     username = "alfresco"

@@ -66,7 +66,7 @@ cd "${home}/src/projects/${project}/${environment}"
 
 to_run="$(\
   echo "terraform ""${command}""\
-    -var-file=./inputs.tfvars\
+    ""$([ -f inputs.tfvars ] && echo "-var-file=./inputs.tfvars")""\
     ""$([[ "${auto_approve}" = "1" ]] && echo "-auto-approve")""\
     ""$([[ "${no_refresh}" = "1" ]] && echo "-refresh=false")"""\
   | sed -E 's/ {2,}/ /g' -\

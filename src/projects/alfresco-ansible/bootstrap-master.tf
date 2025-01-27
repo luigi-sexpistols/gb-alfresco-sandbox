@@ -1,3 +1,8 @@
+resource "random_string" "alfresco_search_shared_secret" {
+  length = 32
+  special = false
+}
+
 # WARNING
 # This is _not_ the right way to do this, it's just convenient for PoC env.
 resource "terraform_data" "master_bootstrap" {
@@ -31,7 +36,32 @@ resource "terraform_data" "master_bootstrap" {
   }
 
   provisioner "file" {
-    destination = "/tmp/inventory-alfresco.yaml"
+    destination = "/tmp/alfresco-extras.yaml"
+    content = yamlencode({
+      known_urls = [
+        "http://${module.alfresco_proxy.public_dns}",
+        "http://${module.alfresco_proxy.public_dns}/share"
+      ]
+    })
+  }
+
+  provisioner "file" {
+    destination = "/tmp/alfresco-secrets.yaml"
+    content = yamlencode({
+      # all these values _MUST_ be supplied, even if they're empty
+      repo_db_password = module.alfresco_db_user_password.result
+      activemq_password = module.alfresco_mq.user_password
+      sync_db_password = module.alfresco_db_user_password.result
+      reposearch_shared_secret = random_string.alfresco_search_shared_secret.result
+      elasticsearch_password = ""
+      ca_signing_key_passphrase = ""
+      certs_p12_passphrase = ""
+      identity_admin_password = ""
+    })
+  }
+
+  provisioner "file" {
+    destination = "/tmp/alfresco-inventory.yaml"
     content = yamlencode({
       all = {
         vars = {
@@ -65,18 +95,18 @@ resource "terraform_data" "master_bootstrap" {
               db_host = module.alfresco_database.endpoint
               repo_db_name = module.alfresco_database.database_name
               repo_db_username = local.db.username
-              repo_db_password = module.alfresco_db_user_password.result
-              activemq_transport = "ssl"
-              activemq_host = module.alfresco_mq.private_ip_address
-              activemq_username = module.alfresco_mq.user_username
-              activemq_password = module.alfresco_mq.user_password
-              known_urls = [
-                "http://localhost/",
-                "http://localhost/share"
-              ]
             }
           }
-          search = { hosts = {} }
+          search = {
+            # todo(2)
+            hosts = {
+              "${module.alfresco_instance.instance_id}" = {
+                inventory_name = module.alfresco_instance.instance_id
+                ansible_host = module.alfresco_instance.private_ip_address
+                ansible_ssh_private_key_file = "/home/ec2-user/.ssh/${module.alfresco_instance.instance_id}.pem"
+              }
+            }
+          }
           transformers = {
             hosts = {
               "${module.alfresco_instance.instance_id}" = {
@@ -87,33 +117,43 @@ resource "terraform_data" "master_bootstrap" {
             }
           }
           search_enterprise = {
+            # todo(3)
+            # hosts = {
+            #   "${module.alfresco_instance.instance_id}" = {
+            #     inventory_name = module.alfresco_instance.instance_id
+            #     ansible_host = module.alfresco_instance.private_ip_address
+            #     ansible_ssh_private_key_file = "/home/ec2-user/.ssh/${module.alfresco_instance.instance_id}.pem"
+            #   }
+            # }
+          }
+          activemq = {}
+          database = {}
+          elasticsearch = {}
+          identity = {}
+          nginx = {}
+          acc = {}
+          adw = {}
+          syncservice = {}
+          audit_storage = {}
+          other_repo_clients = {}
+          external_activemq = {
             hosts = {
-              "${module.alfresco_instance.instance_id}" = {
-                inventory_name = module.alfresco_instance.instance_id
-                ansible_host = module.alfresco_instance.private_ip_address
-                ansible_ssh_private_key_file = "/home/ec2-user/.ssh/${module.alfresco_instance.instance_id}.pem"
+              "${module.alfresco_mq.endpoint}" = {
+                ansible_host = module.alfresco_mq.private_ip_address
+                activemq_username = module.alfresco_mq.user_username
+                activemq_port = 61617
+                activemq_transport = "ssl"
               }
             }
           }
-          activemq = { hosts = {} }
-          database = { hosts = {} }
-          elasticsearch = { hosts = {} }
-          identity = { hosts = {} }
-          nginx = { hosts = {} }
-          acc = { hosts = {} }
-          adw = { hosts = {} }
-          syncservice = { hosts = {} }
-          audit_storage = { hosts = {} }
-          other_repo_clients = { hosts = {} }
-          external_activemq = { hosts = {} }
-          external_elasticsearch = { hosts = {} }
-          external_identity = { hosts = {} }
+          external_elasticsearch = {}
+          external_identity = {}
           external = {
             children = {
-              external_activemq = null
-              external_elasticsearch = null
-              external_identity = null
-              other_repo_clients = null
+              external_activemq = {}
+              external_elasticsearch = {}
+              external_identity = {}
+              other_repo_clients = {}
             }
           }
           trusted_resource_consumers = {

@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
-    }
   }
 }
 
@@ -36,10 +32,6 @@ variable "associate_public_ip_address" {
   default = false
 }
 
-variable "instance_profile_name" {
-  type = string
-}
-
 variable "security_group_ids" {
   type = list(string)
   default = []
@@ -48,11 +40,6 @@ variable "security_group_ids" {
 variable "tags" {
   type = map(string)
   default = {}
-}
-
-variable "key_pair_name" {
-  type = string
-  default = null
 }
 
 data "aws_subnet" "destination" {
@@ -69,31 +56,27 @@ data "aws_vpc" "destination" {
   }
 }
 
-resource "random_string" "sg_suffix" {
-  length = 5
-  upper = false
-  lower = true
-  special = false
-  numeric = false
+module "name_suffix" {
+  source = "../../utils/name-suffix"
 }
 
-resource "tls_private_key" "this" {
-  count = var.key_pair_name == null ? 1 : 0
+module "key_pair" {
+  source = "../key-pair"
 
-  algorithm = "RSA"
-  rsa_bits = 4096
+  name = var.name
 }
 
-resource "aws_key_pair" "this" {
-  count = var.key_pair_name == null ? 1 : 0
+module "instance_profile" {
+  source = "../instance-profile"
 
-  public_key = tls_private_key.this.0.public_key_openssh
+  name = var.name
 }
+
 
 module "security_group" {
   source = "../security-group"
 
-  name = "${var.name}-${random_string.sg_suffix.result}"
+  name = var.name
   vpc_id = data.aws_vpc.destination.id
 }
 
@@ -103,10 +86,10 @@ resource "aws_instance" "this" {
   subnet_id = data.aws_subnet.destination.id
   associate_public_ip_address = var.associate_public_ip_address
   vpc_security_group_ids = concat([module.security_group.security_group_id], var.security_group_ids)
-  key_name = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.this.0.key_name
-  iam_instance_profile = var.instance_profile_name
+  key_name = module.key_pair.key_name
+  iam_instance_profile = module.instance_profile.instance_profile_name
 
-  tags = merge({ Name = var.name }, var.tags)
+  tags = merge({ Name = "${var.name}-${module.name_suffix.result}" }, var.tags)
 }
 
 output "instance_id" {
@@ -126,11 +109,19 @@ output "security_group_id" {
 }
 
 output "ssh_private_key" {
-  value = var.key_pair_name == null ? tls_private_key.this.0.private_key_pem : "provided key"
+  value = module.key_pair.private_key
   sensitive = true
   depends_on = [aws_instance.this]
 }
 
 output "availability_zone" {
   value = aws_instance.this.availability_zone
+}
+
+output "instance_profile_name" {
+  value = aws_instance.this.iam_instance_profile
+}
+
+output "iam_role_name" {
+  value = aws_instance.this.iam_instance_profile
 }

@@ -17,6 +17,13 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  backend "s3" {
+    profile = "terraform"
+    bucket = "ashley-sbx-terraform-state-pjbfg"
+    key = "alfresco-ami/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
 }
 
 provider "aws" {

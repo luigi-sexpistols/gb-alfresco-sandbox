@@ -1,10 +1,3 @@
-module "master_instance_profile" {
-  source = "../../modules/aws/instance-profile"
-
-  name = "${local.name_prefix}-master"
-  policy_arns = {}
-}
-
 module "master_instance" {
   source = "../../modules/aws/ec2-instance"
 
@@ -12,7 +5,6 @@ module "master_instance" {
   ami_id = data.aws_ami.rhel9.id
   instance_type = "t3.micro"
   subnet_id = module.network_data.private_subnets.0.id
-  instance_profile_name = module.master_instance_profile.instance_profile_name
 
   tags = {
     DailyShutdown = "Yes"

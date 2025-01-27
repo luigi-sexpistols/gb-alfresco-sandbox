@@ -12,32 +12,27 @@ data "aws_iam_policy_document" "alfresco_instance_profile" {
   }
 }
 
-resource "aws_iam_policy" "alfresco_instance_profile" {
-  name = "${local.name_prefix}-instance-profile"
-  policy = data.aws_iam_policy_document.alfresco_instance_profile.json
-}
-
-module "alfresco_instance_profile" {
-  source = "../../modules/aws/instance-profile"
-
-  name = "${local.name_prefix}-alfresco"
-  policy_arns = {
-    "ssm-params" = aws_iam_policy.alfresco_instance_profile.arn
-  }
-}
-
 module "alfresco_instance" {
   source = "../../modules/aws/ec2-instance"
 
-  name = "${local.name_prefix}-alfresco"
+  name = local.name
   ami_id = data.aws_ami.alfresco.id
   subnet_id = data.aws_subnet.instance.id
-  instance_type = "t3.large"
-  instance_profile_name = module.alfresco_instance_profile.instance_profile_name
+  instance_type = "t3.xlarge"
 
   tags = {
     DailyShutdown = "Yes"
   }
+}
+
+resource "aws_iam_policy" "alfresco_instance_profile" {
+  name = "${local.name}-instance-profile"
+  policy = data.aws_iam_policy_document.alfresco_instance_profile.json
+}
+
+resource "aws_iam_role_policy_attachment" "alfresco_instance_profile_ssm" {
+  role = module.alfresco_instance.iam_role_name
+  policy_arn = aws_iam_policy.alfresco_instance_profile.arn
 }
 
 module "alfresco_sg_rules" {
@@ -49,7 +44,7 @@ module "alfresco_sg_rules" {
     "ssh-bastion" = {
       protocol = "tcp"
       port = 22
-      referenced_security_group_id = data.aws_security_group.bastion.id
+      referenced_security_group_id = module.network_data.bastion_security_group.id
     }
 
     "http-proxy" = {

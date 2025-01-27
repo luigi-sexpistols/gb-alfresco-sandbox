@@ -5,7 +5,7 @@ data "http" "developer_ip" {
 module "alfresco_proxy" {
   source = "../../modules/aws/application-load-balancer"
 
-  name = "${local.name_prefix}-alfresco"
+  name = local.name_prefix
   subnet_ids = module.network_data.public_subnets.*.id
   protocol = "HTTP"
   incoming_port = 80

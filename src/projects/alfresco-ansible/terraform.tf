@@ -17,6 +17,13 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  backend "s3" {
+    profile = "terraform"
+    bucket = "ashley-sbx-terraform-state-pjbfg"
+    key = "alfresco-ansible/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
 }
 
 provider "aws" {
@@ -24,8 +31,8 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Tenant = var.tenant
-      Environment = var.environment
+      Tenant = "ashley"
+      Environment = "sandbox"
     }
   }
 }

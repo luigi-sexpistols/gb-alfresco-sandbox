@@ -4,6 +4,17 @@ module "network_data" {
   source = "../../modules/utils/networking-data"
 }
 
+data "terraform_remote_state" "alfresco_builder" {
+  backend = "s3"
+
+  config = {
+    profile = "terraform"
+    bucket = "ashley-sbx-terraform-state-pjbfg"
+    key = "alfresco-ami-builder/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
+}
+
 resource "random_shuffle" "instance_subnet_ids_pool" {
   input = module.network_data.private_subnets.*.id
 }

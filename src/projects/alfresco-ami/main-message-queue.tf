@@ -1,7 +1,7 @@
 module "alfresco_mq" {
   source = "../../modules/aws/message-queue"
 
-  name = "${local.name_prefix}-alfresco"
+  name = local.name
   subnet_ids = [data.aws_subnet.message_queue.id]
   username = local.mq.username
 }

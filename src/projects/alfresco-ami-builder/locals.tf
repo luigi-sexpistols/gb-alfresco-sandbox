@@ -1,7 +1,5 @@
 locals {
-  name_prefix = "${var.tenant}-${var.environment}"
-
-  alfresco_files_path = "/home/ashley/Development/gallagher-bassett/alfresco-files"
+  name = "ashley-sbx-alfami-build"
 
   image = {
     tomcat = {

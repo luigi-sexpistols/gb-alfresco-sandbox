@@ -20,11 +20,6 @@ variable "terminate_on_fail" {
   default = false
 }
 
-variable "instance_profile_policy_arns" {
-  type = map(string)
-  default = {}
-}
-
 data "aws_caller_identity" "this" {}
 
 data "aws_iam_policy" "instance_profile_for_image_builder" {
@@ -54,8 +49,12 @@ data "aws_vpc" "destination" {
   id = data.aws_subnet.destination.vpc_id
 }
 
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
+
 resource "aws_iam_policy" "builder" {
-  name = var.name
+  name = "${var.name}-${module.name_suffix.result}"
   policy = data.aws_iam_policy_document.build_permissions.json
 }
 
@@ -64,14 +63,11 @@ module "instance_profile" {
 
   name = var.name
 
-  policy_arns = merge(
-    {
-      "instance-profile" = data.aws_iam_policy.instance_profile_for_image_builder.arn,
-      "ssm-instance-core" = data.aws_iam_policy.ssm_managed_instance_core.arn,
-      "builder" = aws_iam_policy.builder.arn
-    },
-    var.instance_profile_policy_arns
-  )
+  policy_arns = {
+    "instance-profile" = data.aws_iam_policy.instance_profile_for_image_builder.arn,
+    "ssm-instance-core" = data.aws_iam_policy.ssm_managed_instance_core.arn,
+    "builder" = aws_iam_policy.builder.arn
+  }
 }
 
 module "key_pair" {
@@ -83,7 +79,7 @@ module "key_pair" {
 module "security_group" {
   source = "../security-group"
 
-  name = "${var.name}-imagebuilder"
+  name = var.name
   vpc_id = data.aws_vpc.destination.id
 
   egress_rules = {
@@ -96,7 +92,7 @@ module "security_group" {
 }
 
 resource "aws_imagebuilder_infrastructure_configuration" "this" {
-  name = var.name
+  name = "${var.name}-${module.name_suffix.result}"
   subnet_id = data.aws_subnet.destination.id
   key_pair = module.key_pair.key_name
   instance_profile_name = module.instance_profile.instance_profile_name
@@ -110,7 +106,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "this" {
   terminate_instance_on_failure = var.terminate_on_fail
 
   tags = {
-    Name = var.name
+    Name = "${var.name}-${module.name_suffix.result}"
   }
 }
 
@@ -120,4 +116,8 @@ output "security_group_id" {
 
 output "infrastructure_config_id" {
   value = aws_imagebuilder_infrastructure_configuration.this.id
+}
+
+output "iam_role_name" {
+  value = module.instance_profile.role_name
 }

@@ -1,10 +1,3 @@
-module "bastion_instance_profile" {
-  source = "../../modules/aws/instance-profile"
-
-  name = "${local.name_prefix}-bastion"
-  policy_arns = {}
-}
-
 module "bastion_instance" {
   source = "../../modules/aws/ec2-instance"
 
@@ -13,7 +6,6 @@ module "bastion_instance" {
   instance_type = "t3.micro"
   subnet_id = module.network.public_subnets.0.id
   associate_public_ip_address = true
-  instance_profile_name = module.bastion_instance_profile.instance_profile_name
 
   tags = {
     DailyShutdown = "Yes"
@@ -34,10 +26,10 @@ module "bastion_sg_rules" {
   }
 
   egress = {
-    "all" = {
-      protocol = "-1"
-      port = -1
-      cidr_block = "0.0.0.0/0"
+    "ssh-vpc" = {
+      protocol = "tcp"
+      port = 22
+      cidr_block = module.network.vpc.cidr_block
     }
   }
 }

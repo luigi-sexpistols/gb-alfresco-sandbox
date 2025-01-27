@@ -1,5 +1,5 @@
 locals {
-  name_prefix = "${var.tenant}-${var.environment}"
+  name = "ashley-sbx-alfami-app"
 
   efs = {
     mount_point = "/mnt/efs/alfresco"

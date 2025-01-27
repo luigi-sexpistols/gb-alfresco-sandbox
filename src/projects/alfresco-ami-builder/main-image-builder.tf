@@ -1,35 +1,33 @@
-data "aws_ami" "alfresco_builder" {
-  most_recent = true
-  owners = ["amazon"]
+module "tomcat_admin_password" {
+  source = "../../modules/utils/password"
 
-  filter {
-    name = "name"
-    values = ["RHEL-9.4.*_HVM-*-x86_64-*-Hourly2-GP3"]
-  }
+  length = 24
 }
 
-resource "aws_iam_policy" "builder_extra" {
-  name = "${local.name_prefix}-builder-extra"
-  policy = data.aws_iam_policy_document.builder_extra.json
+resource "aws_iam_policy" "alfresco_builder_s3" {
+  name = "${local.name}-s3"
+  policy = data.aws_iam_policy_document.alfresco_builder_s3.json
 }
 
 module "alfresco_builder_infra_config" {
   source = "../../modules/aws/image-builder-infrastructure-configuration"
 
-  name = "${local.name_prefix}-builder"
+  name = local.name
   subnet_id = data.aws_subnet.builder.id
   terminate_on_fail = true
-  instance_profile_policy_arns = {
-    "builder-extra" = aws_iam_policy.builder_extra.arn
-  }
+}
+
+resource "aws_iam_role_policy_attachment" "alfresco_builder_s3" {
+  role = module.alfresco_builder_infra_config.iam_role_name
+  policy_arn = aws_iam_policy.alfresco_builder_s3.arn
 }
 
 module "alfresco_builder_recipe" {
   source = "../../modules/aws/image-builder-image-recipe"
 
-  name = "${local.name_prefix}-builder"
+  name = local.name
   base_image_id = data.aws_ami.alfresco_builder.id
-  recipe_version = "0.12.2"
+  recipe_version = "1.0.4"
 
   components = {
     "01-system-prep" = {
@@ -66,11 +64,11 @@ module "alfresco_builder_recipe" {
 module "alfresco_builder_dist_config" {
   source = "../../modules/aws/image-builder-distribution-configuration"
 
-  name = "${local.name_prefix}-builder"
+  name = local.name
 }
 
 resource "aws_imagebuilder_image_pipeline" "alfresco" {
-  name = "${local.name_prefix}-builder"
+  name = local.name
   infrastructure_configuration_arn = module.alfresco_builder_infra_config.infrastructure_config_id
   image_recipe_arn = module.alfresco_builder_recipe.recipe_arn
   distribution_configuration_arn = module.alfresco_builder_dist_config.distribution_configuration_arn
@@ -78,5 +76,9 @@ resource "aws_imagebuilder_image_pipeline" "alfresco" {
 
   image_tests_configuration {
     image_tests_enabled = false
+  }
+
+  tags = {
+    Name = local.name
   }
 }

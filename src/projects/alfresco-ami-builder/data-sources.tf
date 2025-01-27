@@ -23,10 +23,20 @@ data "aws_iam_policy_document" "image_builder_bucket" {
   }
 }
 
-data "aws_iam_policy_document" "builder_extra" {
+data "aws_iam_policy_document" "alfresco_builder_s3" {
   statement {
     effect = "Allow"
     actions = ["s3:GetObject"]
     resources = ["${module.image_builder_bucket.bucket.arn}/*"]
+  }
+}
+
+data "aws_ami" "alfresco_builder" {
+  most_recent = true
+  owners = ["amazon"]
+
+  filter {
+    name = "name"
+    values = ["RHEL-9.4.*_HVM-*-x86_64-*-Hourly2-GP3"]
   }
 }

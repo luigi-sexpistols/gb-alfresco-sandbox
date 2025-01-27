@@ -6,6 +6,7 @@ terraform {
     }
   }
 }
+
 variable "name" {
   type = string
 }
@@ -14,12 +15,16 @@ variable "retention_in_days" {
   type = number
 }
 
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
+
 resource "aws_cloudwatch_log_group" "this" {
-  name = var.name
+  name = "${var.name}-${module.name_suffix.result}"
   retention_in_days = var.retention_in_days
 
   tags = {
-    Name = var.name
+    Name = "${var.name}-${module.name_suffix.result}"
   }
 }
 

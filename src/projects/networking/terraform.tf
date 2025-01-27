@@ -5,6 +5,13 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    profile = "terraform"
+    bucket = "ashley-sbx-terraform-state-pjbfg"
+    key = "networking/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
 }
 
 provider "aws" {

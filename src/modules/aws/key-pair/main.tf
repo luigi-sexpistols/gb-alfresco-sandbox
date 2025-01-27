@@ -8,10 +8,18 @@ terraform {
       source = "hashicorp/tls"
       version = "~> 4.0"
     }
+    random = {
+      source = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
 variable "name" { type = string }
+
+module "name_suffix" {
+  source = "../../utils/name-suffix"
+}
 
 resource "tls_private_key" "this" {
   algorithm = "RSA"
@@ -19,11 +27,11 @@ resource "tls_private_key" "this" {
 }
 
 resource "aws_key_pair" "this" {
-  key_name = var.name
+  key_name = "${var.name}-${module.name_suffix.result}"
   public_key = tls_private_key.this.public_key_openssh
 
   tags = {
-    Name = var.name
+    Name = "${var.name}-${module.name_suffix.result}"
   }
 }
 
