@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+echo "Sadly this doesn't work for multiple instances, please fix when it gets too annoying."
+echo "For now, use the AWS console to do it."
+exit 1
+
 # load from `setenv.sh` if it exists
 if [ -f "$(pwd)/setenv.sh" ]; then
   . setenv.sh
@@ -18,7 +22,9 @@ if [ -z "${instance_ids}" ]; then
   exit 0
 fi
 
-starting=$(aws ec2 start-instances --instance-ids "${instance_ids}")
+# In theory this should allow multiple instances to be started at once, but it's not liking receiving them in the same
+# argument (e.g. `--instance-ids="i-0000 i-1111"`)... need to figure out exactly what it's expecting here.
+starting=$(aws ec2 start-instances --instance-ids="$(echo "${instance_ids}" | tr '\n' ' ' | xargs)")
 
 # check for valid JSON response
 echo "${starting}" | jq empty 2> /dev/null

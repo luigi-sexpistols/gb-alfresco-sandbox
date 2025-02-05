@@ -18,7 +18,7 @@ module "lambda_daily_shutdown" {
 module "lambda_daily_shutdown_schedule" {
   source = "../../modules/aws/lambda-function-schedule"
 
-  lambda_function_name = module.lambda_daily_shutdown.function_name
+  lambda_function_arn = module.lambda_daily_shutdown.function_arn
   schedule_expression = "cron(30 6 * * ? *)"
 }
 

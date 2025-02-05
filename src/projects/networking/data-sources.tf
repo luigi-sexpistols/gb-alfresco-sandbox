@@ -1,11 +1,5 @@
-data "aws_ami" "bastion" {
-  most_recent = true
-  owners = ["amazon"]
-
-  filter {
-    name = "name"
-    values = ["al2023-ami-2023*-x86_64"]
-  }
+module "dev_ip" {
+  source = "../../modules/utils/dev-ip-address"
 }
 
 data "local_file" "lambda_daily_shutdown" {
@@ -33,8 +27,4 @@ data "aws_iam_policy_document" "lambda_daily_shutdown" {
     ]
     resources = ["*"]
   }
-}
-
-data "http" "developer_ip" {
-  url = "https://ipv4.icanhazip.com"
 }

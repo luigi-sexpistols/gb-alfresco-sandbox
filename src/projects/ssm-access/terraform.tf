@@ -9,7 +9,7 @@ terraform {
   backend "s3" {
     profile = "terraform"
     bucket = "ashley-sbx-terraform-state-pjbfg"
-    key = "networking/terraform.tfstate"
+    key = "ssm-access/terraform.tfstate"
     region = "ap-southeast-2"
   }
 }

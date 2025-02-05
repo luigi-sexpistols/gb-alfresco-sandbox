@@ -1,11 +1,11 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
       version = "~> 5.0"
     }
     tls = {
-      source  = "hashicorp/tls"
+      source = "hashicorp/tls"
       version = "~> 4.0"
     }
   }
@@ -37,6 +37,11 @@ variable "security_group_ids" {
   default = []
 }
 
+variable "allow_session_manager_access" {
+  type = bool
+  default = true
+}
+
 variable "tags" {
   type = map(string)
   default = {}
@@ -56,6 +61,17 @@ data "aws_vpc" "destination" {
   }
 }
 
+data "aws_ami" "instance" {
+  filter {
+    name = "image-id"
+    values = [var.ami_id]
+  }
+}
+
+resource "terraform_data" "is_windows" {
+  input = lower(data.aws_ami.instance.platform) == "windows"
+}
+
 module "name_suffix" {
   source = "../../utils/name-suffix"
 }
@@ -72,7 +88,6 @@ module "instance_profile" {
   name = var.name
 }
 
-
 module "security_group" {
   source = "../security-group"
 
@@ -88,8 +103,33 @@ resource "aws_instance" "this" {
   vpc_security_group_ids = concat([module.security_group.security_group_id], var.security_group_ids)
   key_name = module.key_pair.key_name
   iam_instance_profile = module.instance_profile.instance_profile_name
+  get_password_data = terraform_data.is_windows.output
+
+  metadata_options {
+    http_tokens = "required"
+  }
 
   tags = merge({ Name = "${var.name}-${module.name_suffix.result}" }, var.tags)
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_core" {
+  count = var.allow_session_manager_access ? 1 : 0
+
+  role = module.instance_profile.role_name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cw_logs" {
+  count = var.allow_session_manager_access ? 1 : 0
+
+  role = module.instance_profile.role_name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "terraform_data" "password_data" {
+  input = (terraform_data.is_windows.output
+    ? rsadecrypt(aws_instance.this.password_data, module.key_pair.private_key)
+    : "not a windows host")
 }
 
 output "instance_id" {
@@ -116,6 +156,11 @@ output "ssh_private_key" {
 
 output "availability_zone" {
   value = aws_instance.this.availability_zone
+}
+
+output "instance_password" {
+  value = terraform_data.password_data.output
+  sensitive = true
 }
 
 output "instance_profile_name" {
