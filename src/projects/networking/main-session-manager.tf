@@ -1,7 +1,7 @@
 module "ssm_session_log_group" {
   source = "../../modules/aws/cloudwatch-log-group"
 
-  name = "${local.name_prefix}-sessions"
+  name = "${local.name_prefix}-session-manager"
   retention_in_days = 1
 }
 
