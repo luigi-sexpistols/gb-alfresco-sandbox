@@ -1,7 +1,3 @@
-data "http" "developer_ip" {
-  url = "https://ipv4.icanhazip.com"
-}
-
 module "alfresco_proxy" {
   source = "../../modules/aws/application-load-balancer"
 
@@ -26,12 +22,12 @@ module "alfresco_proxy_sg_rules" {
     "http-ashley" = {
       protocol = "tcp"
       port = 80
-      cidr_block = "${trimspace(data.http.developer_ip.response_body)}/32"
+      cidr_block = module.dev_ip.cidr_block
     }
     "https-ashley" = {
       protocol = "tcp"
       port = 443
-      cidr_block = "${trimspace(data.http.developer_ip.response_body)}/32"
+      cidr_block = module.dev_ip.cidr_block
     }
   }
 

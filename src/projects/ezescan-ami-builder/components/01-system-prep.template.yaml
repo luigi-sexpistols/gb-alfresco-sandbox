@@ -1,0 +1,22 @@
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: DownloadCloudWatchLogsAgentInstaller
+        action: WebDownload
+        onFailure: Abort
+        inputs:
+#          - source: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi
+#            destination: C:\Windows\Temp\amazon-cloudwatch-agent.msi
+          - source: https://amazoncloudwatch-agent.s3.amazonaws.com/windows/amd64/latest/amazon-cloudwatch-agent.msi
+            destination: C:\Windows\Temp\amazon-cloudwatch-agent.msi
+      - name: InstallCloudWatchLogsAgent
+        action: ExecutePowerShell
+        onFailure: Abort
+        inputs:
+          commands:
+            - |
+              $package = "C:\Windows\Temp\amazon-cloudwatch-agent.msi"
+              $logFile = "C:\Windows\Temp\amazon-cloudwatch-agent.log"
+              
+              Start-Process msiexec "/i $package /qn /L*V $logFile"

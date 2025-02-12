@@ -71,3 +71,27 @@ variable "target_port" {
     error_message = "Must be between 1 and 65535."
   }
 }
+
+variable "target_type" {
+  type = string
+  default = "instance"
+}
+
+variable "cognito_auth_config" {
+  type = object({
+    user_pool_arn = string
+    user_pool_client_id = string
+    user_pool_domain = string
+  })
+  default = null
+}
+
+variable "certificate_arn" {
+  type = string
+  default = null
+}
+
+variable "enable_access_logging" {
+  type = bool
+  default = false
+}

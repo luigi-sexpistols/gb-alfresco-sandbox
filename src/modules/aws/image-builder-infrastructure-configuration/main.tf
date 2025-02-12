@@ -118,6 +118,10 @@ output "infrastructure_config_id" {
   value = aws_imagebuilder_infrastructure_configuration.this.id
 }
 
+output "infrastructure_config_arn" {
+  value = aws_imagebuilder_infrastructure_configuration.this.arn
+}
+
 output "iam_role_name" {
   value = module.instance_profile.role_name
 }
