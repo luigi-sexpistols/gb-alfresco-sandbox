@@ -49,6 +49,16 @@ variable "security_group_ids" {
   default = []
 }
 
+variable "enable_iam_authentication" {
+  type = bool
+  default = false
+}
+
+variable "serverless" {
+  type = bool
+  default = true
+}
+
 data "aws_subnet" "destination" {
   count = length(var.subnet_ids)
   id = var.subnet_ids[count.index]
@@ -81,9 +91,11 @@ module "security_group" {
   vpc_id = data.aws_vpc.destination.id
 }
 
-resource "aws_rds_cluster" "this" {
+resource "aws_rds_cluster" "this_serverless" {
+  count = var.serverless ? 1 : 0
+
   cluster_identifier = "${var.name}-${module.name_suffix.result}"
-  engine = "aurora-${var.engine}"
+  engine = var.engine
   engine_version = var.engine_version
   availability_zones = data.aws_subnet.destination.*.availability_zone
   database_name = var.database_name
@@ -94,6 +106,7 @@ resource "aws_rds_cluster" "this" {
   db_subnet_group_name = aws_db_subnet_group.this.name
   skip_final_snapshot = true
   apply_immediately = true
+  iam_database_authentication_enabled = var.enable_iam_authentication
 
   serverlessv2_scaling_configuration {
     max_capacity = 1.0
@@ -105,47 +118,81 @@ resource "aws_rds_cluster" "this" {
   }
 }
 
+resource "aws_rds_cluster" "this_no_serverless" {
+  count = var.serverless ? 0 : 1
+
+  cluster_identifier = "${var.name}-${module.name_suffix.result}"
+  engine = var.engine
+  engine_version = var.engine_version
+  availability_zones = data.aws_subnet.destination.*.availability_zone
+  database_name = var.database_name
+  master_username = var.admin_username
+  master_password = length(random_password.admin) == 1 ? random_password.admin.0.result : var.admin_password
+  backup_retention_period = 1
+  vpc_security_group_ids = concat([module.security_group.security_group_id], var.security_group_ids)
+  db_subnet_group_name = aws_db_subnet_group.this.name
+  skip_final_snapshot = true
+  apply_immediately = true
+  iam_database_authentication_enabled = var.enable_iam_authentication
+
+  tags = {
+    Name = "${var.name}-${module.name_suffix.result}"
+  }
+}
+
+resource "terraform_data" "cluster" {
+  input = (
+    var.serverless
+      ? aws_rds_cluster.this_serverless
+      : aws_rds_cluster.this_no_serverless
+  ).0
+}
+
 resource "aws_rds_cluster_instance" "this" {
   count = var.instance_count
 
-  cluster_identifier = aws_rds_cluster.this.cluster_identifier
-  identifier = "${aws_rds_cluster.this.cluster_identifier}-${count.index}"
+  cluster_identifier = terraform_data.cluster.output.cluster_identifier
+  identifier = "${terraform_data.cluster.output.cluster_identifier}-${count.index}"
   instance_class = "db.serverless"
-  engine = aws_rds_cluster.this.engine
-  engine_version = aws_rds_cluster.this.engine_version
+  engine = terraform_data.cluster.output.engine
+  engine_version = terraform_data.cluster.output.engine_version
 
   tags = {
-    Name = "${aws_rds_cluster.this.cluster_identifier}-${count.index + 1}"
+    Name = "${terraform_data.cluster.output.cluster_identifier}-${count.index + 1}"
   }
 }
 
 output "cluster_id" {
-  value = aws_rds_cluster.this.id
+  value = terraform_data.cluster.output.cluster_identifier
 }
 
 output "instance_ids" {
   value = aws_rds_cluster_instance.this.*.id
 }
 
+output "instance_resource_ids" {
+  value = aws_rds_cluster_instance.this.*.dbi_resource_id
+}
+
 output "admin_username" {
-  value = aws_rds_cluster.this.master_username
+  value = terraform_data.cluster.output.master_username
 }
 
 output "admin_password" {
-  value = aws_rds_cluster.this.master_password
+  value = terraform_data.cluster.output.master_password
   sensitive = true
 }
 
 output "database_name" {
-  value = aws_rds_cluster.this.database_name
+  value = terraform_data.cluster.output.database_name
 }
 
 output "endpoint" {
-  value = aws_rds_cluster.this.endpoint
+  value = terraform_data.cluster.output.endpoint
 }
 
 output "reader_endpoint" {
-  value = aws_rds_cluster.this.reader_endpoint
+  value = terraform_data.cluster.output.reader_endpoint
 }
 
 output "security_group_id" {
