@@ -20,3 +20,11 @@ resource "aws_ssm_document" "session_prefs" {
     prevent_destroy = true
   }
 }
+
+module "ssm_vpc_endpoint" {
+  source = "../../modules/aws/vpc-endpoint"
+
+  name = "${local.name_prefix}-ssm"
+  vpc_id = module.network_data.vpc.id
+  service_name = "com.amazonaws.ap-southeast-2.ssm"
+}

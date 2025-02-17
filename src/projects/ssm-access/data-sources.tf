@@ -33,3 +33,15 @@ data "aws_subnet" "linux" {
 data "aws_subnet" "windows" {
   id = random_shuffle.subnet_id_pool.result[1]
 }
+
+data "aws_subnet" "mysql" {
+  id = random_shuffle.subnet_id_pool.result[0]
+}
+
+data "aws_subnet" "sqlserver" {
+  id = random_shuffle.subnet_id_pool.result[1]
+}
+
+data "aws_subnet" "oracle_db" {
+  id = random_shuffle.subnet_id_pool.result[2]
+}
