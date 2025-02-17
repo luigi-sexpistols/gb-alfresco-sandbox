@@ -1,0 +1,27 @@
+{
+  "name": "alb-cognito-poc",
+  "version": "1.0.0",
+  "description": "Simple app to prove the concept of OAuth using Cognito at the ALB.",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "aws-jwt-verify": "^5.0.0",
+    "aws-lambda": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/node": "^22.9.4",
+    "axios": "^1.7.9",
+    "jsonwebtoken": "^9.0.2",
+    "node-loader": "^2.1.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0",
+    "zip-webpack-plugin": "^4.0.2"
+  }
+}

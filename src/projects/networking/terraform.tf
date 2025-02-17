@@ -20,9 +20,9 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Tenant = var.tenant
-      Environment = var.environment
-      Name = "${var.tenant}-${var.environment}-shared"
+      Tenant = "Ashley"
+      Environment = "Sandbox"
+      Project = "Fineos Cloud Upgrade"
     }
   }
 }

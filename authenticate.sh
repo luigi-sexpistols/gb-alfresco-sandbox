@@ -5,6 +5,10 @@ if [ -f "$(pwd)/setenv.sh" ]; then
   . setenv.sh
 fi
 
+if [ ! -z "$2" ]; then
+  GB_TF_AWS_ASSUMED_ROLE_ARN="$2"
+fi
+
 if [ -z "${GB_TF_AWS_ASSUMED_ROLE_ARN}" ]; then
   echo "Please set ARN of the role to assume in '\$GB_TF_AWS_ASSUMED_ROLE_ARN'."
   exit 1
@@ -26,6 +30,10 @@ fi
 
 if [ -z "${GB_TF_AWS_REGION}" ]; then
   GB_TF_AWS_REGION='ap-southeast-2'
+fi
+
+if [ ! -z "$1" ]; then
+  GB_TF_AWS_CLI_PROFILE_ASSUMED_ROLE="$1"
 fi
 
 if [ -z "${GB_TF_AWS_CLI_PROFILE_ASSUMED_ROLE}" ]; then

@@ -2,6 +2,10 @@ resource "aws_vpc" "this" {
   cidr_block = var.cidr_block
   enable_dns_support = true
   enable_dns_hostnames = true
+
+  tags = {
+    Name = var.name
+  }
 }
 
 resource "aws_subnet" "public" {
@@ -14,7 +18,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = join("-", [
-      local.vpc_name,
+      var.name,
       "public",
       substr(var.public_subnets[count.index].availability_zone, -1, 1)
     ])
@@ -30,21 +34,32 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = join("-", [
-      local.vpc_name,
+      var.name,
       "private",
       substr(var.public_subnets[count.index].availability_zone, -1, 1)
     ])
-
   }
 }
 
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
+
+  tags = {
+    Name = var.name
+  }
 }
 
-resource "aws_eip" "nat_gateway" {}
+resource "aws_eip" "nat_gateway" {
+  tags = {
+    Name = "${var.name}-natgw"
+  }
+}
 
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat_gateway.id
   subnet_id = aws_subnet.public[0].id
+
+  tags = {
+    Name = var.name
+  }
 }

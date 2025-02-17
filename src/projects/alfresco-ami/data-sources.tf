@@ -4,6 +4,10 @@ module "network_data" {
   source = "../../modules/utils/networking-data"
 }
 
+module "dev_ip" {
+  source = "../../modules/utils/dev-ip-address"
+}
+
 data "terraform_remote_state" "alfresco_builder" {
   backend = "s3"
 

@@ -70,6 +70,19 @@ data "aws_iam_policy_document" "logging" {
   }
 }
 
+data "aws_iam_policy_document" "execution" {
+  statement {
+    sid = "AllowEc2"
+    effect = "Allow"
+    actions = [
+      "ec2:CreateNetworkInterface",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DeleteNetworkInterface"
+    ]
+    resources = ["*"]
+  }
+}
+
 module "security_group" {
   source = "../security-group"
 
@@ -89,7 +102,12 @@ resource "aws_iam_policy" "logging" {
   policy = data.aws_iam_policy_document.logging.json
 }
 
-resource "aws_iam_role_policy_attachment" "execution" {
+resource "aws_iam_policy" "execution" {
+  name = "${var.name}-execution"
+  policy = data.aws_iam_policy_document.execution.json
+}
+
+resource "aws_iam_role_policy_attachment" "basic_execution" {
   role = module.iam_role.role_name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
@@ -97,6 +115,11 @@ resource "aws_iam_role_policy_attachment" "execution" {
 resource "aws_iam_role_policy_attachment" "logging" {
   role = module.iam_role.role_name
   policy_arn = aws_iam_policy.logging.arn
+}
+
+resource "aws_iam_role_policy_attachment" "execution" {
+  role = module.iam_role.role_name
+  policy_arn = aws_iam_policy.execution.arn
 }
 
 module "log_group" {
@@ -136,7 +159,7 @@ resource "aws_lambda_function" "this" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.execution,
+    aws_iam_role_policy_attachment.basic_execution,
     aws_iam_role_policy_attachment.logging
   ]
 }
