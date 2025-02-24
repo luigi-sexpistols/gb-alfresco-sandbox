@@ -29,7 +29,7 @@ $actingProfile = "gb-ssm"
 $sessionName = "instance-connect"
 $region = "ap-southeast-2"
 
-$targetInstanceId = "i-0590dff587e0024b8"
+$targetInstanceId = "i-09cf1e833b7b15394"
 $document = "AWS-StartPortForwardingSession"
 
 $awsCredsFile = "~/.aws/credentials" | Resolve-Path

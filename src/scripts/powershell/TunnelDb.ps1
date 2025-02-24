@@ -28,7 +28,11 @@ $actingProfile = "gb-ssm"
 $sessionName = "db-tunnel"
 $region = "ap-southeast-2"
 
-$bastionInstanceId = "i-0590dff587e0024b8"
+$bastionInstanceId = "i-09cf1e833b7b15394"
+$document = "AWS-StartPortForwardingSessionToRemoteHost"
+
+$awsCredsFile = "~/.aws/credentials" | Resolve-Path
+$awsCaBundleFile = "~/Downloads/ZscalerRootCertificate-2048-SHA256.crt" | Resolve-Path
 
 $token = Read-Host "MFA token"
 
@@ -36,13 +40,25 @@ Set-DefaultAWSRegion -Region $region
 Set-AWSCredential -ProfileName $identityProfile
 
 $response = Use-STSRole -RoleArn $roleArn -RoleSessionName $sessionName -SerialNumber $mfaDeviceArn -Token $token
-$credentials = New-AWSCredentials -AccessKey $response.Credentials.AccessKeyId -SecretKey $response.Credentials.SecretAccessKey -SessionToken $response.Credentials.SessionToken
+$credential = New-AWSCredential -AccessKey $response.Credentials.AccessKeyId -SecretKey $response.Credentials.SecretAccessKey -SessionToken $response.Credentials.SessionToken
 
 # switch to the assumed role
-Set-AWSCredential -StoreAs $actingProfile -Credential $credentials
-Set-AWSCredential -ProfileName $actingProfile
+Set-AWSCredential -ProfileLocation $awsCredsFile -StoreAs $actingProfile -Credential $credential
+# OR use assume-role directly? (doesn't seem to work 2025-02-24)
+# Set-AWSCredential -StoreAs $actingProfile -SourceProfile $identityProfile -RoleArn $roleArn -MfaSerial $mfaDeviceArn
+Set-AWSCredential -ProfileLocation $awsCredsFile -ProfileName $actingProfile
 
 # todo - get values from terraform
 
+Write-Host "Connect to `127.0.0.1:$localPort`."
 
-Start-SSMSession -Target $bastionInstanceId -DocumentName "AWS-StartPortForwardingSessionToRemoteHost" -Parameter @{ host = $hostAddress; portNumber = $port; localPortNumber = $localPort }
+Set-Alias -Name aws -Value "C:\Program Files\Amazon\AWSCLIV2\aws.exe"
+
+$paramsFile = New-TemporaryFile
+Set-Content -Path $paramsFile -Value (@{
+    host = @($hostAddress)
+    portNumber = @($port)
+    localPortNumber = @($localPort)
+} | ConvertTo-Json -Compress)
+
+aws --profile=$actingProfile --region $region --ca-bundle $awsCaBundleFile ssm start-session --target=$bastionInstanceId --document-name=$document --parameters="file://$paramsFile"

@@ -17,6 +17,7 @@ terraform {
 provider "aws" {
   # for networking and other "global" resources
   profile = "terraform"
+  region = "ap-southeast-2"
 
   default_tags {
     tags = {
