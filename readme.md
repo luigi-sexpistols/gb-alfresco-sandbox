@@ -2,11 +2,15 @@
 
 ![Apply order.](readme-files/sandbox-apply-order.png "Apply order.")
 
-Note that the `Image Pipeline` step(s) are performed manually at this stage. 
+Note that the `Image Pipeline` step(s) are performed manually at this stage.
 
 ## Scripts
 
-### `authenticate.sh`
+Scripts are available for Linux (`src/scripts/bash`) and Windows PowerShell (`src/scripts/powershell`).
+
+### Authenticate
+
+#### Linux setup
 
 Use to authenticate with AWS and create a `terraform` profile with assumed role credentials. Copy `setenv.sh.dist` to
 `setenv.sh` and fill in the missing details; the auth script will automatically pick up these values.
@@ -16,12 +20,18 @@ Use to authenticate with AWS and create a `terraform` profile with assumed role 
 ```shell
 cp setenv.sh.dist setenv.sh
 # enter details in setenv.sh
-./authenticate
+./src/scripts/bash/authenticate.sh
 ```
 
-### `deploy.sh`
+```powershell
+./src/scripts/powershell/Authenticate.ps1
+```
 
-Convenience script for executing a deploy in a given project and environment. Can be used to `plan`, `apply`, and 
+### Deploy
+
+Available for Linux only at present.
+
+Convenience script for executing a deploy in a given project and environment. Can be used to `plan`, `apply`, and
 `destroy`.
 
 #### Usage
@@ -42,7 +52,9 @@ All args are optional except `--project`.
 ./deploy.sh --project=networking --apply
 ```
 
-### `run-in-project-env.sh`
+### Run in project
+
+Available for Linux only at present.
 
 Used to run other Terraform commands like `init`.
 
@@ -59,23 +71,11 @@ Used to run other Terraform commands like `init`.
 ./run-in-project-env.sh --project=networking --environment=au-dev --command='terraform init -upgrade'
 ```
 
-## Running in Windows
+### Start Session Manager session
 
-The first step is to call `sts:AssumeRole` to assume the admin role in the sandbox account. This requires an MFA token
-from your authenticator app/device.
+Use the correct script according to your platform.
 
-```shell
-aws --profile=gb-identity sts assume-role\
-  --role-session-name=terraform\
-  --role-arn='arn:awn:iam::202533530829:role/AdminRole'\
-  --serial-number='arn:aws:iam::800891318996:mfa/Personal-Phone'\
-  --token-code='{MFA_TOKEN_FROM_PHONE}'
-```
-
-Use the values resulting from this to set the required AWS credentials:
-
-```shell
-aws --profile=terraform configure set aws_access_key_id '{ACCESS_KEY_ID}'
-aws --profile=terraform configure set aws_secret_access_key '{ACCESS_KEY_SECRET}'
-aws --profile=terraform configure set aws_session_token '{SESSION_TOKEN}'
-```
+| Script                                          | Linux                | Windows              |
+|:------------------------------------------------|:---------------------|:---------------------|
+| Start direct connection to instance.            | `tunnel-instance.sh` | `TunnelInstance.ps1` |
+| Start port forwarding connection to other host. | `tunnel-db.sh`       | `TunnelDb.ps1`       |

@@ -17,6 +17,8 @@
 
 # Write-Host "Done installing, continuing to connect."
 
+# todo - DRY this code out (auth stuff in its own script, etc)
+
 $port = '22'
 $localPort = "22$port"
 
