@@ -13,6 +13,11 @@ output "linux_port" {
   value = 22
 }
 
+output "linux_ssh_private_key" {
+  value = module.linux_instance.ssh_private_key
+  sensitive = true
+}
+
 #### DATABASE: MYSQL ####
 
 output "mysql_host" {
