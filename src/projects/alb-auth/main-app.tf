@@ -108,6 +108,16 @@ module "app_alb_firewall" {
       port = 80
       cidr_block = module.dev_ip.cidr_block
     }
+    "https-all" = {
+      protocol = "tcp"
+      port = 443
+      cidr_block = "0.0.0.0/0"
+    }
+    "http-all" = { # only for redirect to https
+      protocol = "tcp"
+      port = 80
+      cidr_block = "0.0.0.0/0"
+    }
   }
 
   egress = {
