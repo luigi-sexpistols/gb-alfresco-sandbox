@@ -3,6 +3,8 @@
 # load from `setenv.sh` if it exists
 if [ -f "$(pwd)/setenv.sh" ]; then
   . setenv.sh
+elif [ -f "$(pwd)/src/scripts/bash/setenv.sh" ]; then
+  . ./src/scripts/bash/setenv.sh
 fi
 
 if [ ! -z "$2" ]; then
