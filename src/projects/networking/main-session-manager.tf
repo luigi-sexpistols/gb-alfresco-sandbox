@@ -25,6 +25,6 @@ module "ssm_vpc_endpoint" {
   source = "../../modules/aws/vpc-endpoint"
 
   name = "${local.name_prefix}-ssm"
-  vpc_id = module.network_data.vpc.id
+  vpc_id = module.network.vpc.id
   service_name = "com.amazonaws.ap-southeast-2.ssm"
 }

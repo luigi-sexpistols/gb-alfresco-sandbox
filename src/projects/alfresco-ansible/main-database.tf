@@ -2,7 +2,7 @@ module "alfresco_database" {
   source = "../../modules/aws/rds-cluster"
 
   name = "${local.name_prefix}-alfresco"
-  engine = "postgresql"
+  engine = "postgres"
   database_name = "alfresco"
   subnet_ids = module.network_data.private_subnets.*.id
   instance_count = 1

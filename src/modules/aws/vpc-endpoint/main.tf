@@ -20,7 +20,7 @@ variable "service_name" {
 }
 
 data "aws_vpc" "destination" {
-
+  id = var.vpc_id
 }
 
 module "security_group" {
@@ -38,6 +38,7 @@ resource "aws_vpc_endpoint" "ssm" {
   vpc_id = var.vpc_id
   service_name = var.service_name
   security_group_ids = [module.security_group.security_group_id]
+  vpc_endpoint_type = "Interface"
 
   tags = {
     Name = var.name
