@@ -33,7 +33,7 @@ resource "aws_alb_target_group" "this" {
   port = (var.target_type == "lambda"
     ? null
     : (var.port != null ? var.port : var.target_port))
-  protocol = (var.target_type == "lambda"
+  protocol = (var.target_type == "instance"
     ? (var.protocol != null ? var.protocol : var.target_protocol)
     : null)
 

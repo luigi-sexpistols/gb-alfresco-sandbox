@@ -9,18 +9,21 @@ terraform {
   backend "s3" {
     profile = "terraform"
     bucket = "ashley-sbx-terraform-state-pjbfg"
-    key = "ezescan-ami-builder/terraform.tfstate"
+    key = "testing-sandbox/terraform.tfstate"
     region = "ap-southeast-2"
   }
 }
 
 provider "aws" {
+  # for networking and other "global" resources
   profile = "terraform"
+  region = "ap-southeast-2"
 
   default_tags {
     tags = {
-      Tenant = "ashley"
-      Environment = "sandbox"
+      Tenant = "Ashley"
+      Environment = "Sandbox"
+      Project = "Fineos Cloud Upgrade"
     }
   }
 }

@@ -5,3 +5,4 @@ export GB_TF_AWS_ASSUMED_ROLE_ARN='arn:aws:iam::202533530829:role/AdminRole'
 export GB_TF_AWS_CLI_PROFILE_IDENTITY='gb-identity'
 export GB_TF_AWS_CLI_PROFILE_ASSUMED_ROLE='terraform'
 export GB_TF_AWS_REGION='ap-southeast-2'
+

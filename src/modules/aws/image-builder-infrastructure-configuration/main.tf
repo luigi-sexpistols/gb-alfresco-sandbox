@@ -98,12 +98,11 @@ resource "aws_imagebuilder_infrastructure_configuration" "this" {
   instance_profile_name = module.instance_profile.instance_profile_name
   instance_types = ["t3.micro"]
   security_group_ids = [module.security_group.security_group_id]
+  terminate_instance_on_failure = var.terminate_on_fail
 
   instance_metadata_options {
     http_tokens = "required"
   }
-
-  terminate_instance_on_failure = var.terminate_on_fail
 
   tags = {
     Name = "${var.name}-${module.name_suffix.result}"
