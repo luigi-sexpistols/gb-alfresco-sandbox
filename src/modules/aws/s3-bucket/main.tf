@@ -37,8 +37,9 @@ resource "aws_s3_bucket_versioning" "this" {
 }
 
 resource "aws_s3_bucket_policy" "this" {
+  count = var.bucket_policy != null ? 1 : 0
   bucket = aws_s3_bucket.this.bucket
-  policy = var.bucket_policy != null ? var.bucket_policy : ""
+  policy = var.bucket_policy
 }
 
 output "bucket_id" {
