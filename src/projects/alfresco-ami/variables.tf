@@ -1,8 +1,8 @@
-variable "tenant" {
+variable "gb_project_code" {
   type = string
 }
 
-variable "environment" {
+variable "map_project_code" {
   type = string
 }
 

@@ -35,8 +35,9 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Tenant = "ashley"
-      Environment = "sandbox"
+      Environment = "Ashley Sandbox"
+      Project = var.gb_project_code
+      map-project = var.map_project_code
     }
   }
 }

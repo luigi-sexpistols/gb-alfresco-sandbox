@@ -21,7 +21,8 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = "ALB + Cognio Authentication PoC"
-      Project = "Fineos Cloud Upgrade"
+      Project = var.gb_project_code
+      map-project = var.map_project_code
     }
   }
 }

@@ -21,9 +21,9 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Tenant = "Ashley"
-      Environment = "Sandbox"
-      Project = "Fineos Cloud Upgrade"
+      Environment = "ALB + Cognio Authentication PoC"
+      Project = var.gb_project_code
+      map-project = var.map_project_code
     }
   }
 }
