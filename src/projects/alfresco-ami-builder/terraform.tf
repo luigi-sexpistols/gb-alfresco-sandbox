@@ -37,7 +37,7 @@ provider "aws" {
     tags = {
       Environment = "Ashley Sandbox"
       Project = var.gb_project_code
-      map-project = var.map_project_code
+      map-migrated = var.map_project_code
     }
   }
 }
