@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Copy this file to `setenv.sh` and fill in the blanks. Running `authenticate.sh` will pull these values.
+
 export GB_TF_AWS_MFA_DEVICE_ARN=''
 export GB_TF_AWS_ASSUMED_ROLE_ARN=''
 export GB_TF_AWS_CLI_PROFILE_IDENTITY='gb-identity'
