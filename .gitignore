@@ -148,4 +148,4 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-./setenv.sh
+**/setenv.sh
