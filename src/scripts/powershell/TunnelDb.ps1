@@ -17,9 +17,17 @@
 
 # Write-Host "Done installing, continuing to connect."
 
-$hostAddress = "ashley-sbx-ssmpoc-mysql-exdhv.cluster-c78mwgqim3ye.ap-southeast-2.rds.amazonaws.com"
-$port = '3306'
-$localPort = "5$port"
+$engine = Read-Host "DB Engine [oracle|mssql]"
+
+#$hostAddress = "ashley-sbx-ssmpoc-mysql-exdhv.cluster-c78mwgqim3ye.ap-southeast-2.rds.amazonaws.com"
+#$port = '3306'
+
+$adminUsername = terraform -chdir='./src/projects/ssm-access' output -raw "$($engine)_admin_username"
+$adminPassword = terraform -chdir='./src/projects/ssm-access' output -raw "$($engine)_admin_password"
+$hostAddress = terraform -chdir='./src/projects/ssm-access' output -raw "$($engine)_host"
+$hostPort = terraform -chdir='./src/projects/ssm-access' output -raw "$($engine)_port"
+
+$localPort = "5$hostPort"
 
 $roleArn = "arn:aws:iam::202533530829:role/AdminRole"
 $mfaDeviceArn = "arn:aws:iam::800891318996:mfa/Personal-Phone"
@@ -48,16 +56,19 @@ Set-AWSCredential -ProfileLocation $awsCredsFile -StoreAs $actingProfile -Creden
 # Set-AWSCredential -StoreAs $actingProfile -SourceProfile $identityProfile -RoleArn $roleArn -MfaSerial $mfaDeviceArn
 Set-AWSCredential -ProfileLocation $awsCredsFile -ProfileName $actingProfile
 
-# todo - get values from terraform
-
-Write-Host "Connect to `127.0.0.1:$localPort`."
+Write-Host ""
+Write-Host "Host: 127.0.0.1"
+Write-Host "Port: $localPort"
+Write-Host "Username: $adminUsername"
+Write-Host "Password: $adminPassword"
+Write-Host ""
 
 Set-Alias -Name aws -Value "C:\Program Files\Amazon\AWSCLIV2\aws.exe"
 
 $paramsFile = New-TemporaryFile
 Set-Content -Path $paramsFile -Value (@{
     host = @($hostAddress)
-    portNumber = @($port)
+    portNumber = @($hostPort)
     localPortNumber = @($localPort)
 } | ConvertTo-Json -Compress)
 
