@@ -5,13 +5,14 @@ module "oracle_database" {
   source = "../../modules/aws/rds-instance"
 
   name = local.name
-  database_name = "EXPORTTEST"
-  engine = "oracle-se2"
-  engine_version = "19.0.0.0.ru-2025-01.rur-2025-01.r1"
+  database_name = "ORCL"
+  engine = "oracle-se2-cdb"
+  engine_version = "21.0.0.0.ru-2025-01.rur-2025-01.r2"
   subnet_ids = module.network_data.private_subnets.*.id
   serverless = false
   license_model = "license-included"
   instance_class = "db.t3.small"
+  encrypted = true
 }
 
 module "oracle_sg_rules" {

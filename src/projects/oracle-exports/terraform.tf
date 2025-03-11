@@ -13,7 +13,7 @@ terraform {
   backend "s3" {
     profile = "terraform"
     bucket = "ashley-sbx-terraform-state-pjbfg"
-    key = "ssm-patching/terraform.tfstate"
+    key = "oracle-exports/terraform.tfstate"
     region = "ap-southeast-2"
   }
 }

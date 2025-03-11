@@ -74,6 +74,11 @@ variable "instance_class" {
   default = "db.t3.micro"
 }
 
+variable "encrypted" {
+  type = bool
+  default = false
+}
+
 data "aws_subnet" "destination" {
   count = length(var.subnet_ids)
   id = var.subnet_ids[count.index]
@@ -123,6 +128,8 @@ resource "aws_db_instance" "this" {
   iam_database_authentication_enabled = var.enable_iam_authentication
   multi_az =  var.multi_az
   license_model = var.license_model
+  storage_encrypted = var.encrypted
+  allow_major_version_upgrade = true
 
   tags = {
     Name = "${var.name}-${module.name_suffix.result}"
